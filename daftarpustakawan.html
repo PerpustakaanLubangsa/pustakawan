@@ -66,6 +66,7 @@
 <body>
   <div class="form-box">
     <h1>Daftar Pustakawan</h1>
+    <input type="text" id="id" placeholder="ID Pustakawan (bebas)" />
     <input type="text" id="nama" placeholder="Nama lengkap" />
     <button onclick="daftar()">Daftar</button>
     <div id="notif"></div>
@@ -95,44 +96,30 @@
       notif.style.color = warna;
     }
 
-    function generateRandomId() {
-      // Minimal 5 digit, maksimal 7 digit
-      const min = 10000;
-      const max = 9999999;
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
     window.daftar = async function() {
+      const id = document.getElementById("id").value.trim();
       const nama = document.getElementById("nama").value.trim();
-      if (!nama) {
-        tampilNotif("Nama tidak boleh kosong.");
+
+      if (!id || !nama) {
+        tampilNotif("ID dan Nama tidak boleh kosong.");
         return;
       }
 
-      const pustRef = ref(db, "pustakawan");
-      const snap = await get(pustRef);
-      const data = snap.exists() ? snap.val() : {};
+      const refPus = ref(db, `pustakawan/${id}`);
+      const snap = await get(refPus);
 
-      let idBaru;
-      let maxPercobaan = 10;
-      let percobaan = 0;
-
-      do {
-        idBaru = generateRandomId().toString();
-        percobaan++;
-      } while (data[idBaru] && percobaan < maxPercobaan);
-
-      if (data[idBaru]) {
-        tampilNotif("❌ Gagal menghasilkan ID unik. Coba lagi.", "red");
+      if (snap.exists()) {
+        tampilNotif("❌ ID sudah digunakan. Gunakan ID lain.", "red");
         return;
       }
 
-      await set(ref(db, `pustakawan/${idBaru}`), {
+      await set(refPus, {
         nama: nama,
         sejak: Date.now()
       });
 
-      tampilNotif(`✔️ Pustakawan "${nama}" berhasil terdaftar dengan ID: ${idBaru}`, "#4caf50");
+      tampilNotif(`✔️ Berhasil daftar. ID: ${id}`, "#4caf50");
+      document.getElementById("id").value = "";
       document.getElementById("nama").value = "";
     };
   </script>

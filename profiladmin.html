@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Profil Pustakawan</title>
+  <title>Profil Admin - Edit Pustakawan</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -41,23 +41,17 @@
       padding: 10px;
       font-size: 16px;
       background: #2a2a2a;
-      color: #ccc;
-      border: 1px solid #444;
+      color: white;
+      border: 1px solid #555;
       border-radius: 6px;
     }
-    input:read-only {
-      background: #2a2a2a;
-      color: #ccc;
-      border-color: #333;
+    .info input:focus {
+      outline: none;
+      border-color: #1e88e5;
     }
-    #chatBtn {
-      margin-top: 40px;
-      display: block;
-      text-align: center;
+    #simpanBtn {
+      margin-top: 30px;
       width: 100%;
-      max-width: 320px;
-      margin-left: auto;
-      margin-right: auto;
       padding: 12px;
       background: #1e88e5;
       color: white;
@@ -75,29 +69,29 @@
   </style>
 </head>
 <body>
-  <h1>Profil Pustakawan</h1>
+  <h1>Profil Admin</h1>
   <div id="profilBox">
     <img id="foto" src="1.png" alt="Foto Pustakawan" />
 
     <div class="info"><label>ID</label><input id="fid" readonly /></div>
-    <div class="info"><label>Nama</label><input id="fnama" readonly /></div>
+    <div class="info"><label>Nama</label><input id="fnama" /></div>
     <div class="info"><label>Anggota Sejak</label><input id="fsejak" readonly /></div>
-    <div class="info"><label>Jabatan</label><input id="fjabatan" readonly /></div>
-    <div class="info"><label>Nomor Telepon</label><input id="ftelepon" readonly /></div>
-    <div class="info"><label>Alamat</label><input id="falamat" readonly /></div>
-    <div class="info"><label>Tempat Tanggal Lahir</label><input id="fttl" readonly /></div>
-    <div class="info"><label>Instagram</label><input id="fig" readonly /></div>
-    <div class="info"><label>Facebook</label><input id="ffb" readonly /></div>
-    <div class="info"><label>TikTok</label><input id="ftiktok" readonly /></div>
+    <div class="info"><label>Jabatan</label><input id="fjabatan" /></div>
+    <div class="info"><label>Nomor Telepon</label><input id="ftelepon" /></div>
+    <div class="info"><label>Alamat</label><input id="falamat" /></div>
+    <div class="info"><label>Tempat Tanggal Lahir</label><input id="fttl" /></div>
+    <div class="info"><label>Instagram</label><input id="fig" /></div>
+    <div class="info"><label>Facebook</label><input id="ffb" /></div>
+    <div class="info"><label>TikTok</label><input id="ftiktok" /></div>
 
-    <button id="chatBtn">Chat dengan Pustakawan</button>
+    <button id="simpanBtn">Simpan</button>
     <div id="notif"></div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import {
-      getDatabase, ref, get
+      getDatabase, ref, get, update
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -129,16 +123,16 @@
     };
 
     const notif = document.getElementById("notif");
-    const chatBtn = document.getElementById("chatBtn");
+    const simpanBtn = document.getElementById("simpanBtn");
 
     function tampilNotif(teks, warna = "#fdd835") {
       notif.textContent = teks;
       notif.style.color = warna;
     }
 
-    async function muatProfil() {
+    async function muatData() {
       if (!id) {
-        tampilNotif("ID tidak ditemukan di URL.", "red");
+        tampilNotif("ID tidak ditemukan.", "red");
         return;
       }
 
@@ -158,19 +152,27 @@
         refs.ffb.value = data.fb || "";
         refs.ftiktok.value = data.tiktok || "";
       } else {
-        tampilNotif("Profil tidak ditemukan", "red");
+        tampilNotif("Profil tidak ditemukan.", "red");
       }
     }
 
-    chatBtn.onclick = () => {
-      if (id) {
-        location.href = `ruang.html?id=${id}`;
-      } else {
-        tampilNotif("ID tidak valid untuk chat", "red");
-      }
+    simpanBtn.onclick = async () => {
+      const dataBaru = {
+        nama: refs.fnama.value.trim(),
+        jabatan: refs.fjabatan.value.trim(),
+        telepon: refs.ftelepon.value.trim(),
+        alamat: refs.falamat.value.trim(),
+        ttl: refs.fttl.value.trim(),
+        ig: refs.fig.value.trim(),
+        fb: refs.ffb.value.trim(),
+        tiktok: refs.ftiktok.value.trim()
+      };
+
+      await update(ref(db, `pustakawan/${id}`), dataBaru);
+      tampilNotif("✔️ Data berhasil diperbarui.", "#4caf50");
     };
 
-    muatProfil();
+    muatData();
   </script>
 </body>
 </html>
