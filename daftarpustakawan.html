@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login Pustakawan</title>
+  <title>Daftar Pustakawan</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -11,12 +11,13 @@
       background: #121212;
       color: white;
       margin: 0;
+      padding: 20px;
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
     }
-    .login-box {
+    .form-box {
       width: 100%;
       max-width: 360px;
       background: #1e1e1e;
@@ -29,55 +30,52 @@
       margin-bottom: 24px;
       font-size: 22px;
     }
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    input, button {
+    input {
       width: 100%;
       padding: 12px;
-      font-size: 16px;
-      border-radius: 6px;
-      border: none;
-    }
-    input {
       background: #2a2a2a;
+      border: none;
+      border-bottom: 2px solid #555;
       color: white;
-      border: 1px solid #444;
+      font-size: 16px;
+      border-radius: 4px;
+      margin-bottom: 16px;
     }
     input:focus {
       outline: none;
-      border-color: #1e88e5;
-      background: #2f2f2f;
+      border-bottom: 2px solid #1e88e5;
     }
     button {
+      width: 100%;
+      padding: 12px;
       background: #1e88e5;
       color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
       cursor: pointer;
     }
     #notif {
-      margin-top: 20px;
+      margin-top: 16px;
       text-align: center;
       font-size: 14px;
       color: #fdd835;
-      min-height: 18px;
     }
   </style>
 </head>
 <body>
-  <div class="login-box">
-    <h1>Login Pustakawan</h1>
-    <div class="form-group">
-      <input type="text" id="id" placeholder="Masukkan ID Pustakawan" autofocus />
-      <button id="btnLogin">Masuk</button>
-    </div>
+  <div class="form-box">
+    <h1>Daftar Pustakawan</h1>
+    <input type="text" id="nama" placeholder="Nama lengkap" />
+    <button onclick="daftar()">Daftar</button>
     <div id="notif"></div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import {
+      getDatabase, ref, get, set
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
@@ -90,35 +88,53 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-
-    const input = document.getElementById("id");
     const notif = document.getElementById("notif");
-    const btn = document.getElementById("btnLogin");
 
     function tampilNotif(teks, warna = "#fdd835") {
       notif.textContent = teks;
       notif.style.color = warna;
     }
 
-    async function login() {
-      const id = input.value.trim();
-      if (!id) {
-        tampilNotif("ID tidak boleh kosong.");
+    function generateRandomId() {
+      // Minimal 5 digit, maksimal 7 digit
+      const min = 10000;
+      const max = 9999999;
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    window.daftar = async function() {
+      const nama = document.getElementById("nama").value.trim();
+      if (!nama) {
+        tampilNotif("Nama tidak boleh kosong.");
         return;
       }
 
-      const refData = ref(db, `pustakawan/${id}`);
-      const snap = await get(refData);
+      const pustRef = ref(db, "pustakawan");
+      const snap = await get(pustRef);
+      const data = snap.exists() ? snap.val() : {};
 
-      if (snap.exists()) {
-        window.location.href = `ruang.html?id=${id}`;
-      } else {
-        tampilNotif("❌ ID tidak ditemukan.", "red");
+      let idBaru;
+      let maxPercobaan = 10;
+      let percobaan = 0;
+
+      do {
+        idBaru = generateRandomId().toString();
+        percobaan++;
+      } while (data[idBaru] && percobaan < maxPercobaan);
+
+      if (data[idBaru]) {
+        tampilNotif("❌ Gagal menghasilkan ID unik. Coba lagi.", "red");
+        return;
       }
-    }
 
-    btn.addEventListener("click", login);
-    window.onload = () => input.focus();
+      await set(ref(db, `pustakawan/${idBaru}`), {
+        nama: nama,
+        sejak: Date.now()
+      });
+
+      tampilNotif(`✔️ Pustakawan "${nama}" berhasil terdaftar dengan ID: ${idBaru}`, "#4caf50");
+      document.getElementById("nama").value = "";
+    };
   </script>
 </body>
 </html>

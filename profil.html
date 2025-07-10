@@ -34,38 +34,40 @@
       margin: 10px 0;
       text-align: left;
     }
-    .info strong {
-      display: inline-block;
-      width: 140px;
+    .info label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+      color: #bbb;
     }
-    input {
+    .info input {
       padding: 8px;
       width: 100%;
       border-radius: 6px;
       border: none;
-      margin-top: 5px;
+      background: #2a2a2a;
+      color: white;
     }
-    #masukBtn, #simpanBtn {
+    #simpanBtn {
       margin-top: 20px;
       padding: 10px 20px;
       font-size: 16px;
       background: #1e88e5;
-      color: white;
       border: none;
+      color: white;
       border-radius: 6px;
-      cursor: pointer;
-      display: block;
       width: 100%;
+      cursor: pointer;
     }
-    #masukBtn:hover, #simpanBtn:hover {
+    #simpanBtn:hover {
       background: #1565c0;
     }
-    #notifikasi {
-      display: none;
-      margin-top: 15px;
-      color: #4caf50;
-      font-weight: bold;
+    #notif {
+      margin-top: 12px;
       text-align: center;
+      color: #fdd835;
+      font-size: 14px;
+      min-height: 16px;
     }
   </style>
 </head>
@@ -73,26 +75,54 @@
   <h1>Profil Pustakawan</h1>
   <div id="profilBox">
     <img id="foto" src="1.png" alt="Foto Pustakawan" />
-    <div class="info"><strong>ID:</strong> <span id="idTampil"></span></div>
+    <div class="info">
+      <label>ID</label>
+      <input type="text" id="id" readonly />
+    </div>
+    <div class="info">
+      <label>Nama</label>
+      <input type="text" id="nama" />
+    </div>
+    <div class="info">
+      <label>Anggota Sejak</label>
+      <input type="text" id="sejak" />
+    </div>
+    <div class="info">
+      <label>Jabatan</label>
+      <input type="text" id="jabatan" />
+    </div>
+    <div class="info">
+      <label>Nomor Telepon</label>
+      <input type="text" id="telepon" />
+    </div>
+    <div class="info">
+      <label>Alamat</label>
+      <input type="text" id="alamat" />
+    </div>
+    <div class="info">
+      <label>Tempat Tanggal Lahir</label>
+      <input type="text" id="ttl" />
+    </div>
+    <div class="info">
+      <label>Instagram</label>
+      <input type="text" id="ig" />
+    </div>
+    <div class="info">
+      <label>Facebook</label>
+      <input type="text" id="fb" />
+    </div>
+    <div class="info">
+      <label>TikTok</label>
+      <input type="text" id="tiktok" />
+    </div>
 
-    <div class="info" id="namaBox"></div>
-    <div class="info" id="tanggalGabungBox"></div>
-    <div class="info" id="jabatanBox"></div>
-    <div class="info" id="teleponBox"></div>
-    <div class="info" id="alamatBox"></div>
-    <div class="info" id="ttlBox"></div>
-    <div class="info" id="instagramBox"></div>
-    <div class="info" id="facebookBox"></div>
-    <div class="info" id="tiktokBox"></div>
-
-    <button id="masukBtn" style="display:none;">💬 Masuk ke Ruang Chat</button>
-    <button id="simpanBtn" style="display:none;">💾 Simpan</button>
-    <div id="notifikasi">✅ Data berhasil diperbarui!</div>
+    <button id="simpanBtn" style="display:none;">Simpan</button>
+    <div id="notif"></div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
@@ -108,83 +138,78 @@
 
     const params = new URLSearchParams(location.search);
     const id = params.get("id");
-    const isEdit = params.get("edit") === "true";
+    const isAdmin = params.get("admin") === "1";
 
-    if (!id) {
-      document.body.innerHTML = "<p style='color:red;'>ID tidak ditemukan di URL.</p>";
-      throw new Error("ID tidak tersedia");
+    const idInput = document.getElementById("id");
+    const namaInput = document.getElementById("nama");
+    const sejakInput = document.getElementById("sejak");
+    const jabatanInput = document.getElementById("jabatan");
+    const teleponInput = document.getElementById("telepon");
+    const alamatInput = document.getElementById("alamat");
+    const ttlInput = document.getElementById("ttl");
+    const igInput = document.getElementById("ig");
+    const fbInput = document.getElementById("fb");
+    const tiktokInput = document.getElementById("tiktok");
+    const simpanBtn = document.getElementById("simpanBtn");
+    const notif = document.getElementById("notif");
+
+    function tampilNotif(teks, warna="#fdd835") {
+      notif.textContent = teks;
+      notif.style.color = warna;
     }
 
-    document.getElementById("idTampil").textContent = id;
+    async function muatProfil() {
+      if (!id) {
+        tampilNotif("ID tidak ditemukan.");
+        return;
+      }
 
-    const fields = {
-      nama: "Nama",
-      tanggalGabung: "Anggota Sejak",
-      jabatan: "Jabatan",
-      telepon: "Nomor Telepon",
-      alamat: "Alamat",
-      ttl: "Tempat Tanggal Lahir",
-      instagram: "Instagram",
-      facebook: "Facebook",
-      tiktok: "TikTok"
-    };
-
-    const inputs = {};
-    const boxes = {};
-
-    for (const key in fields) {
-      inputs[key] = document.createElement("input");
-      boxes[key] = document.getElementById(key + "Box");
-    }
-
-    get(ref(db, "pustakawan/" + id)).then(snap => {
+      const snap = await get(ref(db, `pustakawan/${id}`));
       if (!snap.exists()) {
-        document.body.innerHTML = "<p style='color:red;'>Pustakawan tidak ditemukan.</p>";
+        tampilNotif("Profil tidak ditemukan.");
         return;
       }
 
       const data = snap.val();
+      idInput.value = id;
+      namaInput.value = data.nama || "";
+      sejakInput.value = data.sejak || "";
+      jabatanInput.value = data.jabatan || "";
+      teleponInput.value = data.telepon || "";
+      alamatInput.value = data.alamat || "";
+      ttlInput.value = data.ttl || "";
+      igInput.value = data.ig || "";
+      fbInput.value = data.fb || "";
+      tiktokInput.value = data.tiktok || "";
 
-      for (const key in fields) {
-        const label = fields[key];
-        const value = data[key] || "";
-
-        if (isEdit) {
-          inputs[key].value = value;
-          boxes[key].innerHTML = `<strong>${label}:</strong><br/>`;
-          boxes[key].appendChild(inputs[key]);
-        } else {
-          if (value) {
-            boxes[key].innerHTML = `<strong>${label}:</strong> ${value}`;
-          } else {
-            boxes[key].style.display = "none";
-          }
-        }
-      }
-
-      if (isEdit) {
-        document.getElementById("simpanBtn").style.display = "block";
+      if (!isAdmin) {
+        // Non-admin tidak bisa edit
+        [namaInput, sejakInput, jabatanInput, teleponInput, alamatInput, ttlInput, igInput, fbInput, tiktokInput].forEach(input => {
+          input.setAttribute("readonly", true);
+        });
       } else {
-        document.getElementById("masukBtn").style.display = "block";
+        simpanBtn.style.display = "block";
       }
+    }
 
-      document.getElementById("masukBtn").onclick = () => {
-        location.href = "ruang.html?id=" + id;
+    simpanBtn.onclick = async () => {
+      const dataBaru = {
+        nama: namaInput.value.trim(),
+        sejak: sejakInput.value.trim(),
+        jabatan: jabatanInput.value.trim(),
+        telepon: teleponInput.value.trim(),
+        alamat: alamatInput.value.trim(),
+        ttl: ttlInput.value.trim(),
+        ig: igInput.value.trim(),
+        fb: fbInput.value.trim(),
+        tiktok: tiktokInput.value.trim()
       };
-    });
 
-    document.getElementById("simpanBtn").onclick = () => {
-      const updates = {};
-      for (const key in fields) {
-        updates[key] = inputs[key].value.trim();
-      }
-
-      update(ref(db, "pustakawan/" + id), updates).then(() => {
-        const notif = document.getElementById("notifikasi");
-        notif.style.display = "block";
-        notif.textContent = "✅ Data berhasil diperbarui!";
-      });
+      await update(ref(db, `pustakawan/${id}`), dataBaru);
+      tampilNotif("✅ Profil berhasil disimpan", "#4caf50");
     };
+
+    muatProfil();
   </script>
 </body>
 </html>

@@ -60,6 +60,7 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
+      position: relative;
     }
     #header {
       padding: 14px;
@@ -117,11 +118,33 @@
       border-radius: 6px;
       cursor: pointer;
     }
+
+    /* Tombol Lihat Profil */
+    #lihatProfilBtn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 10;
+      background: #1e88e5;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    #lihatProfilBtn:hover {
+      background: #1565c0;
+    }
   </style>
 </head>
 <body>
   <div id="sidebar"></div>
+
   <div id="main">
+    <!-- Tombol Lihat Profil -->
+    <button id="lihatProfilBtn">Lihat Profil</button>
+
     <div id="header">Ruang Umum</div>
     <div id="chatBox"></div>
     <div id="inputArea">
@@ -169,6 +192,11 @@
     const pesanInput = document.getElementById("pesanInput");
     const kirimBtn = document.getElementById("kirimBtn");
     const sidebar = document.getElementById("sidebar");
+
+    // 👇 Fungsi tombol "Lihat Profil"
+    document.getElementById("lihatProfilBtn").onclick = () => {
+      window.location.href = `profil.html?id=${currentId}`;
+    };
 
     function gabungId(a, b) {
       return [a, b].sort().join("_");
