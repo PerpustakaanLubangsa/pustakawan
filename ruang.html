@@ -5,37 +5,81 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Ruang Chat</title>
   <style>
-    body {
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
       margin: 0;
+      padding: 0;
       font-family: sans-serif;
       background: #121212;
       color: white;
-      display: flex;
-      height: 100vh;
+      height: 100%;
       overflow: hidden;
     }
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #container {
+      flex: 1;
+      display: flex;
+      height: 100%;
+      overflow: hidden;
+    }
+
     #sidebar {
       width: 250px;
       background: #1e1e1e;
       overflow-y: auto;
       border-right: 1px solid #333;
+      transition: transform 0.3s ease;
     }
+
+    #sidebar.hidden {
+      transform: translateX(-100%);
+      position: absolute;
+      z-index: 100;
+      top: 0;
+      left: 0;
+      height: 100%;
+    }
+
+    #toggleSidebar {
+      display: none;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: #1e88e5;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 16px;
+      z-index: 110;
+    }
+
     .kontak {
       padding: 10px 16px;
       border-bottom: 1px solid #333;
       cursor: pointer;
       position: relative;
     }
+
     .kontak:hover {
       background: #2c2c2c;
     }
+
     .kontak.aktif {
       background: #2a2a2a;
       border-left: 4px solid #1e88e5;
     }
+
     .kontak-nama {
       font-weight: bold;
     }
+
     .kontak-preview {
       font-size: 13px;
       color: #aaa;
@@ -44,6 +88,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
     .badge {
       position: absolute;
       right: 16px;
@@ -55,60 +100,69 @@
       border-radius: 999px;
       display: none;
     }
+
     #main {
       flex: 1;
       display: flex;
       flex-direction: column;
-      height: 100vh;
+      height: 100%;
       position: relative;
     }
+
     #header {
-      padding: 14px;
+      padding: 14px 50px 14px 20px;
       background: #1e88e5;
       font-size: 18px;
       font-weight: bold;
+      position: relative;
     }
+
     #chatBox {
       flex: 1;
       overflow-y: auto;
       padding: 14px;
     }
+
     .bubble {
       max-width: 80%;
       padding: 10px 14px;
       margin: 6px 0;
       border-radius: 8px;
-      clear: both;
       word-wrap: break-word;
-      word-break: break-word;
       white-space: pre-wrap;
-      line-height: 1.4em;
       font-size: 15px;
+      line-height: 1.4em;
     }
+
     .me {
       background: #1e88e5;
       margin-left: auto;
       text-align: left;
       color: white;
     }
+
     .other {
       background: #2e2e2e;
       margin-right: auto;
       text-align: left;
       color: white;
     }
+
     #inputArea {
       display: flex;
       padding: 10px;
       border-top: 1px solid #333;
       background: #1a1a1a;
     }
+
     #pesanInput {
       flex: 1;
       padding: 10px;
       border-radius: 6px;
       border: none;
+      font-size: 14px;
     }
+
     #kirimBtn {
       margin-left: 10px;
       background: #1e88e5;
@@ -119,12 +173,10 @@
       cursor: pointer;
     }
 
-    /* Tombol Lihat Profil */
     #lihatProfilBtn {
       position: absolute;
       top: 10px;
       right: 10px;
-      z-index: 10;
       background: #1e88e5;
       color: white;
       border: none;
@@ -132,24 +184,39 @@
       border-radius: 6px;
       font-size: 13px;
       cursor: pointer;
+      z-index: 10;
     }
-    #lihatProfilBtn:hover {
-      background: #1565c0;
+
+    @media (max-width: 768px) {
+      #toggleSidebar {
+        display: block;
+      }
+
+      #sidebar {
+        position: absolute;
+        transform: translateX(-100%);
+      }
+
+      #sidebar.show {
+        transform: translateX(0);
+        z-index: 100;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="sidebar"></div>
+  <button id="toggleSidebar">☰</button>
+  <div id="container">
+    <div id="sidebar"></div>
 
-  <div id="main">
-    <!-- Tombol Lihat Profil -->
-    <button id="lihatProfilBtn">Lihat Profil</button>
-
-    <div id="header">Ruang Umum</div>
-    <div id="chatBox"></div>
-    <div id="inputArea">
-      <input type="text" id="pesanInput" placeholder="Ketik pesan..." />
-      <button id="kirimBtn">Kirim</button>
+    <div id="main">
+      <button id="lihatProfilBtn">Lihat Profil</button>
+      <div id="header">Ruang Umum</div>
+      <div id="chatBox"></div>
+      <div id="inputArea">
+        <input type="text" id="pesanInput" placeholder="Ketik pesan..." />
+        <button id="kirimBtn">Kirim</button>
+      </div>
     </div>
   </div>
 
@@ -173,7 +240,7 @@
       apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
       authDomain: "pustakawan-26664.firebaseapp.com",
       projectId: "pustakawan-26664",
-      storageBucket: "pustakawan-26664.firebasestorage.app",
+      storageBucket: "pustakawan-26664.appspot.com",
       messagingSenderId: "284579513964",
       appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
     };
@@ -193,7 +260,12 @@
     const kirimBtn = document.getElementById("kirimBtn");
     const sidebar = document.getElementById("sidebar");
 
-    // 👇 Fungsi tombol "Lihat Profil"
+    // Tombol toggle sidebar hanya untuk HP
+    const toggleBtn = document.getElementById("toggleSidebar");
+    toggleBtn.onclick = () => {
+      sidebar.classList.toggle("show");
+    };
+
     document.getElementById("lihatProfilBtn").onclick = () => {
       window.location.href = `profil.html?id=${currentId}`;
     };
@@ -203,9 +275,8 @@
     }
 
     function simpanTerakhirBaca(jalurChat) {
-      const timeNow = Date.now();
       update(ref(db, `terakhirBaca/${currentId}`), {
-        [jalurChat]: timeNow
+        [jalurChat]: Date.now()
       });
     }
 
@@ -213,6 +284,8 @@
       tujuanId = id;
       tujuanNama = nama;
       header.textContent = nama;
+
+      sidebar.classList.remove("show");
 
       document.querySelectorAll(".kontak").forEach(el => {
         el.classList.remove("aktif");
@@ -232,10 +305,7 @@
     function muatChat() {
       chatBox.innerHTML = "";
       if (listenerRef) off(listenerRef);
-      const jalur = tujuanId === "umum"
-        ? "chat/umum"
-        : `chat_pribadi/${gabungId(currentId, tujuanId)}`;
-
+      const jalur = tujuanId === "umum" ? "chat/umum" : `chat_pribadi/${gabungId(currentId, tujuanId)}`;
       const chatRef = ref(db, jalur);
       listenerRef = chatRef;
 
@@ -253,9 +323,7 @@
       const teks = pesanInput.value.trim();
       if (!teks) return;
 
-      const jalur = tujuanId === "umum"
-        ? "chat/umum"
-        : `chat_pribadi/${gabungId(currentId, tujuanId)}`;
+      const jalur = tujuanId === "umum" ? "chat/umum" : `chat_pribadi/${gabungId(currentId, tujuanId)}`;
       const batas = tujuanId === "umum" ? 100 : 150;
       const chatRef = ref(db, jalur);
 
@@ -280,7 +348,6 @@
 
     async function bangunSidebar() {
       sidebar.innerHTML = "";
-
       const kontakRef = ref(db, "pustakawan");
       const snap = await get(kontakRef);
       const pustakawan = snap.exists() ? snap.val() : {};
@@ -325,7 +392,6 @@
           get(bacaRef).then(bacaSnap => {
             const waktuBaca = bacaSnap.exists() ? bacaSnap.val() : 0;
             let belumDibaca = 0;
-
             for (const [_, pesan] of pesanList) {
               if (pesan.waktu > waktuBaca && pesan.dari !== currentId) {
                 belumDibaca++;
