@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profil Pustakawan</title>
+  <style>
+    body {
+      background: #121212;
+      color: white;
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    #profilBox {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 480px;
+      margin: auto;
+    }
+    #foto {
+      display: block;
+      margin: 0 auto 20px;
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 100px;
+      border: 2px solid #444;
+    }
+    .info {
+      margin: 10px 0;
+      text-align: left;
+    }
+    .info strong {
+      display: inline-block;
+      width: 140px;
+    }
+    input {
+      padding: 8px;
+      width: 100%;
+      border-radius: 6px;
+      border: none;
+      margin-top: 5px;
+    }
+    #masukBtn, #simpanBtn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #1e88e5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      display: block;
+      width: 100%;
+    }
+    #masukBtn:hover, #simpanBtn:hover {
+      background: #1565c0;
+    }
+    #notifikasi {
+      display: none;
+      margin-top: 15px;
+      color: #4caf50;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Profil Pustakawan</h1>
+  <div id="profilBox">
+    <img id="foto" src="1.png" alt="Foto Pustakawan" />
+    <div class="info"><strong>ID:</strong> <span id="idTampil"></span></div>
+
+    <div class="info" id="namaBox"></div>
+    <div class="info" id="tanggalGabungBox"></div>
+    <div class="info" id="jabatanBox"></div>
+    <div class="info" id="teleponBox"></div>
+    <div class="info" id="alamatBox"></div>
+    <div class="info" id="ttlBox"></div>
+    <div class="info" id="instagramBox"></div>
+    <div class="info" id="facebookBox"></div>
+    <div class="info" id="tiktokBox"></div>
+
+    <button id="masukBtn" style="display:none;">💬 Masuk ke Ruang Chat</button>
+    <button id="simpanBtn" style="display:none;">💾 Simpan</button>
+    <div id="notifikasi">✅ Data berhasil diperbarui!</div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
+      authDomain: "pustakawan-26664.firebaseapp.com",
+      projectId: "pustakawan-26664",
+      storageBucket: "pustakawan-26664.firebasestorage.app",
+      messagingSenderId: "284579513964",
+      appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id");
+    const isEdit = params.get("edit") === "true";
+
+    if (!id) {
+      document.body.innerHTML = "<p style='color:red;'>ID tidak ditemukan di URL.</p>";
+      throw new Error("ID tidak tersedia");
+    }
+
+    document.getElementById("idTampil").textContent = id;
+
+    const fields = {
+      nama: "Nama",
+      tanggalGabung: "Anggota Sejak",
+      jabatan: "Jabatan",
+      telepon: "Nomor Telepon",
+      alamat: "Alamat",
+      ttl: "Tempat Tanggal Lahir",
+      instagram: "Instagram",
+      facebook: "Facebook",
+      tiktok: "TikTok"
+    };
+
+    const inputs = {};
+    const boxes = {};
+
+    for (const key in fields) {
+      inputs[key] = document.createElement("input");
+      boxes[key] = document.getElementById(key + "Box");
+    }
+
+    get(ref(db, "pustakawan/" + id)).then(snap => {
+      if (!snap.exists()) {
+        document.body.innerHTML = "<p style='color:red;'>Pustakawan tidak ditemukan.</p>";
+        return;
+      }
+
+      const data = snap.val();
+
+      for (const key in fields) {
+        const label = fields[key];
+        const value = data[key] || "";
+
+        if (isEdit) {
+          inputs[key].value = value;
+          boxes[key].innerHTML = `<strong>${label}:</strong><br/>`;
+          boxes[key].appendChild(inputs[key]);
+        } else {
+          if (value) {
+            boxes[key].innerHTML = `<strong>${label}:</strong> ${value}`;
+          } else {
+            boxes[key].style.display = "none";
+          }
+        }
+      }
+
+      if (isEdit) {
+        document.getElementById("simpanBtn").style.display = "block";
+      } else {
+        document.getElementById("masukBtn").style.display = "block";
+      }
+
+      document.getElementById("masukBtn").onclick = () => {
+        location.href = "ruang.html?id=" + id;
+      };
+    });
+
+    document.getElementById("simpanBtn").onclick = () => {
+      const updates = {};
+      for (const key in fields) {
+        updates[key] = inputs[key].value.trim();
+      }
+
+      update(ref(db, "pustakawan/" + id), updates).then(() => {
+        const notif = document.getElementById("notifikasi");
+        notif.style.display = "block";
+        notif.textContent = "✅ Data berhasil diperbarui!";
+      });
+    };
+  </script>
+</body>
+</html>
