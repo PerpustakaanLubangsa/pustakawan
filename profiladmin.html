@@ -75,7 +75,7 @@
 
     <div class="info"><label>ID</label><input id="fid" readonly /></div>
     <div class="info"><label>Nama</label><input id="fnama" /></div>
-    <div class="info"><label>Anggota Sejak</label><input id="fsejak" readonly /></div>
+    <div class="info"><label>Anggota Sejak</label><input id="fsejak" /></div>
     <div class="info"><label>Jabatan</label><input id="fjabatan" /></div>
     <div class="info"><label>Nomor Telepon</label><input id="ftelepon" /></div>
     <div class="info"><label>Alamat</label><input id="falamat" /></div>
@@ -143,7 +143,7 @@
         const data = snap.val();
         refs.fid.value = id;
         refs.fnama.value = data.nama || "";
-        refs.fsejak.value = new Date(data.sejak || Date.now()).toLocaleDateString("id-ID");
+        refs.fsejak.value = data.sejak || "";
         refs.fjabatan.value = data.jabatan || "";
         refs.ftelepon.value = data.telepon || "";
         refs.falamat.value = data.alamat || "";
@@ -159,6 +159,7 @@
     simpanBtn.onclick = async () => {
       const dataBaru = {
         nama: refs.fnama.value.trim(),
+        sejak: refs.fsejak.value.trim(), // Diperbarui agar bisa disimpan manual
         jabatan: refs.fjabatan.value.trim(),
         telepon: refs.ftelepon.value.trim(),
         alamat: refs.falamat.value.trim(),
