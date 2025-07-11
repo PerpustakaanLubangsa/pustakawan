@@ -8,34 +8,118 @@
     * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', sans-serif;
+      margin: 0;
       background: #121212;
       color: white;
-      margin: 0;
-      padding: 16px;
+      display: flex;
+      flex-direction: row;
     }
-    h1 {
-      text-align: center;
-      margin-bottom: 16px;
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 64px;
+      background: #1e1e1e;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      border-bottom: 1px solid #333;
+      z-index: 1001;
     }
-    #profilBox {
-      max-width: 500px;
-      margin: 0 auto;
-    }
-    #foto {
-      width: 100px;
+
+    header img {
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      display: block;
-      margin: 0 auto 24px;
+      margin-right: 12px;
+      cursor: pointer;
     }
+
+    header h1 {
+      font-size: 18px;
+      margin: 0;
+    }
+
+    header small {
+      display: block;
+      font-size: 12px;
+      color: #ccc;
+    }
+
+    aside {
+      position: fixed;
+      top: 64px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 64px);
+      background: #1f1f1f;
+      padding: 24px 16px;
+      overflow-y: auto;
+      z-index: 1002;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    aside.show {
+      transform: translateX(0);
+    }
+
+    @media (min-width: 768px) {
+      aside {
+        transform: none !important;
+      }
+    }
+
+    aside h2 {
+      font-size: 18px;
+      margin-top: 0;
+      margin-bottom: 24px;
+    }
+
+    aside a {
+      display: block;
+      color: #ccc;
+      text-decoration: none;
+      padding: 10px;
+      border-bottom: 1px solid #333;
+      margin-bottom: 6px;
+    }
+
+    aside a:hover {
+      background: #2a2a2a;
+      color: white;
+    }
+
+    main {
+      flex: 1;
+      padding: 88px 0 24px;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      main {
+        margin-left: 240px;
+      }
+    }
+
+    #profilBox {
+      width: 100%;
+      padding: 0 24px;
+    }
+
     .info {
       margin-bottom: 16px;
     }
+
     .info label {
       display: block;
       font-size: 14px;
       margin-bottom: 4px;
       text-align: left;
     }
+
     .info input {
       width: 100%;
       padding: 10px;
@@ -45,66 +129,91 @@
       border: 1px solid #444;
       border-radius: 6px;
     }
+
     input:read-only {
       background: #2a2a2a;
       color: #ccc;
       border-color: #333;
     }
-    #chatBtn {
-      margin-top: 40px;
-      display: block;
-      text-align: center;
-      width: 100%;
-      max-width: 320px;
-      margin-left: auto;
-      margin-right: auto;
-      padding: 12px;
-      background: #1e88e5;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
+
     #notif {
       text-align: center;
       margin-top: 16px;
       font-size: 14px;
       color: #fdd835;
     }
+
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    #overlay.show {
+      display: block;
+    }
+
+    @media (min-width: 768px) {
+      #overlay {
+        display: none !important;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>Profil Pustakawan</h1>
-  <div id="profilBox">
-    <img id="foto" src="1.png" alt="Foto Pustakawan" />
 
-    <div class="info"><label>ID</label><input id="fid" readonly /></div>
-    <div class="info"><label>Nama</label><input id="fnama" readonly /></div>
-    <div class="info"><label>Anggota Sejak</label><input id="fsejak" readonly /></div>
-    <div class="info"><label>Jabatan</label><input id="fjabatan" readonly /></div>
-    <div class="info"><label>Nomor Telepon</label><input id="ftelepon" readonly /></div>
-    <div class="info"><label>Alamat</label><input id="falamat" readonly /></div>
-    <div class="info"><label>Tempat Tanggal Lahir</label><input id="fttl" readonly /></div>
-    <div class="info"><label>Instagram</label><input id="fig" readonly /></div>
-    <div class="info"><label>Facebook</label><input id="ffb" readonly /></div>
-    <div class="info"><label>TikTok</label><input id="ftiktok" readonly /></div>
+  <!-- Overlay untuk sidebar mobile -->
+  <div id="overlay" onclick="tutupSidebar()"></div>
 
-    <button id="chatBtn">Chat dengan Pustakawan</button>
-    <div id="notif"></div>
-  </div>
+  <!-- Header atas -->
+  <header>
+    <img id="foto" src="img/1.png" alt="Foto" onclick="toggleSidebar()" />
+    <div>
+      <h1 id="fnamaHeader">Profil Pustakawan</h1>
+      <small id="fjabatanHeader"></small>
+    </div>
+  </header>
 
+  <!-- Sidebar -->
+  <aside id="sidebar">
+    <h2>📚 Menu</h2>
+    <a href="profil.html?id=" id="linkProfil">👤 Profil</a>
+    <a href="beranda.html?id=" id="linkBeranda">🏠 Beranda</a>
+    <a href="catatan.html?id=" id="linkCatatan">📝 Catatan</a>
+    <a href="chat-umum.html?id=" id="linkChatUmum">💬 Chat Umum</a>
+  </aside>
+
+  <!-- Konten utama -->
+  <main>
+    <div id="profilBox">
+      <div class="info"><label>ID</label><input id="fid" readonly /></div>
+      <div class="info"><label>Nama</label><input id="fnama" readonly /></div>
+      <div class="info"><label>Anggota Sejak</label><input id="fsejak" readonly /></div>
+      <div class="info"><label>Jabatan</label><input id="fjabatan" readonly /></div>
+      <div class="info"><label>Nomor Telepon</label><input id="ftelepon" readonly /></div>
+      <div class="info"><label>Alamat</label><input id="falamat" readonly /></div>
+      <div class="info"><label>Tempat Tanggal Lahir</label><input id="fttl" readonly /></div>
+      <div class="info"><label>Instagram</label><input id="fig" readonly /></div>
+      <div class="info"><label>Facebook</label><input id="ffb" readonly /></div>
+      <div class="info"><label>TikTok</label><input id="ftiktok" readonly /></div>
+      <div id="notif"></div>
+    </div>
+  </main>
+
+  <!-- Firebase JS -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import {
-      getDatabase, ref, get
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
       authDomain: "pustakawan-26664.firebaseapp.com",
       projectId: "pustakawan-26664",
-      storageBucket: "pustakawan-26664.firebasestorage.app",
+      storageBucket: "pustakawan-26664.appspot.com",
       messagingSenderId: "284579513964",
       appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
     };
@@ -125,11 +234,12 @@
       fttl: document.getElementById("fttl"),
       fig: document.getElementById("fig"),
       ffb: document.getElementById("ffb"),
-      ftiktok: document.getElementById("ftiktok")
+      ftiktok: document.getElementById("ftiktok"),
+      fnamaHeader: document.getElementById("fnamaHeader"),
+      fjabatanHeader: document.getElementById("fjabatanHeader")
     };
 
     const notif = document.getElementById("notif");
-    const chatBtn = document.getElementById("chatBtn");
 
     function tampilNotif(teks, warna = "#fdd835") {
       notif.textContent = teks;
@@ -141,6 +251,12 @@
         tampilNotif("ID tidak ditemukan di URL.", "red");
         return;
       }
+
+      const links = ["linkProfil", "linkBeranda", "linkCatatan", "linkChatUmum"];
+      links.forEach(linkId => {
+        const el = document.getElementById(linkId);
+        if (el) el.href += id;
+      });
 
       const refData = ref(db, `pustakawan/${id}`);
       const snap = await get(refData);
@@ -157,17 +273,25 @@
         refs.fig.value = data.ig || "";
         refs.ffb.value = data.fb || "";
         refs.ftiktok.value = data.tiktok || "";
+        refs.fnamaHeader.textContent = data.nama || "(Tanpa Nama)";
+        refs.fjabatanHeader.textContent = data.jabatan || "";
       } else {
         tampilNotif("Profil tidak ditemukan", "red");
       }
     }
 
-    chatBtn.onclick = () => {
-      if (id) {
-        location.href = `ruang.html?id=${id}`;
-      } else {
-        tampilNotif("ID tidak valid untuk chat", "red");
-      }
+    // Fungsi buka/tutup sidebar mobile
+    window.toggleSidebar = () => {
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("overlay");
+      const show = !sidebar.classList.contains("show");
+      sidebar.classList.toggle("show", show);
+      overlay.classList.toggle("show", show);
+    };
+
+    window.tutupSidebar = () => {
+      document.getElementById("sidebar").classList.remove("show");
+      document.getElementById("overlay").classList.remove("show");
     };
 
     muatProfil();

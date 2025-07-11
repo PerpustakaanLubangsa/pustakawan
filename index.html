@@ -5,120 +5,110 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login Pustakawan</title>
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
     body {
+      margin: 0;
       font-family: 'Segoe UI', sans-serif;
       background: #121212;
       color: white;
-      margin: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      min-height: 100vh;
+      padding: 24px;
     }
     .login-box {
       width: 100%;
       max-width: 360px;
       background: #1e1e1e;
-      padding: 24px;
+      padding: 32px 24px;
       border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
-    }
-    h1 {
+      box-shadow: 0 0 12px rgba(0,0,0,0.5);
       text-align: center;
+    }
+    .login-box h1 {
       margin-bottom: 24px;
-      font-size: 22px;
+      font-size: 24px;
     }
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+    .login-box input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 16px;
+      background: #2c2c2c;
+      border: 1px solid #444;
+      color: white;
+      border-radius: 6px;
     }
-    input, button {
+    .login-box button {
       width: 100%;
       padding: 12px;
       font-size: 16px;
-      border-radius: 6px;
       border: none;
-    }
-    input {
-      background: #2a2a2a;
-      color: white;
-      border: 1px solid #444;
-    }
-    input:focus {
-      outline: none;
-      border-color: #1e88e5;
-      background: #2f2f2f;
-    }
-    button {
-      background: #1e88e5;
-      color: white;
+      border-radius: 6px;
       cursor: pointer;
+      background: #121212;
+      color: white;
+      margin-bottom: 12px;
+      transition: background 0.3s;
     }
-    #notif {
-      margin-top: 20px;
-      text-align: center;
+    .login-box button:hover {
+      background: #1565c0;
+    }
+    .guest-btn {
+      background: #121212;
+      color: #bbb;
+      border: none;
+      padding: 10px;
       font-size: 14px;
-      color: #fdd835;
-      min-height: 18px;
+      text-decoration: underline;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .guest-btn:hover {
+      color: white;
+    }
+    .login-box small {
+      display: block;
+      margin-top: 12px;
+      color: #888;
+      font-size: 13px;
     }
   </style>
 </head>
 <body>
   <div class="login-box">
     <h1>Login Pustakawan</h1>
-    <div class="form-group">
-      <input type="text" id="id" placeholder="Masukkan ID Pustakawan" autofocus />
-      <button id="btnLogin">Masuk</button>
-    </div>
-    <div id="notif"></div>
+    <input
+      type="text"
+      id="idInput"
+      placeholder="Masukkan ID Pustakawan"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
+      autofocus
+    />
+    <button onclick="masuk()">Masuk</button>
+    <button class="guest-btn" onclick="masukTamu()">Masuk sebagai Tamu</button>
+    <small>Hanya pustakawan terdaftar yang dapat login langsung.</small>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
-      authDomain: "pustakawan-26664.firebaseapp.com",
-      projectId: "pustakawan-26664",
-      storageBucket: "pustakawan-26664.firebasestorage.app",
-      messagingSenderId: "284579513964",
-      appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const input = document.getElementById("id");
-    const notif = document.getElementById("notif");
-    const btn = document.getElementById("btnLogin");
-
-    function tampilNotif(teks, warna = "#fdd835") {
-      notif.textContent = teks;
-      notif.style.color = warna;
-    }
-
-    async function login() {
-      const id = input.value.trim();
-      if (!id) {
-        tampilNotif("ID tidak boleh kosong.");
-        return;
-      }
-
-      const refData = ref(db, `pustakawan/${id}`);
-      const snap = await get(refData);
-
-      if (snap.exists()) {
-        window.location.href = `profil.html?id=${id}`;
+  <script>
+    function masuk() {
+      const id = document.getElementById("idInput").value.trim();
+      if (id) {
+        location.href = `welcome.html?id=${id}`;
       } else {
-        tampilNotif("❌ ID tidak ditemukan.", "red");
+        alert("Silakan masukkan ID terlebih dahulu.");
       }
     }
 
-    btn.addEventListener("click", login);
-    window.onload = () => input.focus();
+    function masukTamu() {
+      location.href = "welcome.html";
+    }
   </script>
 </body>
 </html>
