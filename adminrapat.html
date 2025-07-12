@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Hapus Rapat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #121212;
+      color: white;
+      padding: 24px;
+    }
+    h1 {
+      font-size: 22px;
+    }
+    .rapat-item {
+      background: #1e1e1e;
+      margin-bottom: 12px;
+      padding: 12px;
+      border: 1px solid #333;
+      border-radius: 8px;
+    }
+    .rapat-item h2 {
+      margin: 0 0 4px 0;
+      font-size: 18px;
+    }
+    .rapat-item p {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #ccc;
+    }
+    .rapat-item button {
+      background: #b71c1c;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧹 Admin - Hapus Rapat</h1>
+  <div id="daftarRapat">Memuat...</div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
+      authDomain: "pustakawan-26664.firebaseapp.com",
+      databaseURL: "https://pustakawan-26664-default-rtdb.firebaseio.com",
+      projectId: "pustakawan-26664",
+      storageBucket: "pustakawan-26664.appspot.com",
+      messagingSenderId: "284579513964",
+      appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const daftar = document.getElementById("daftarRapat");
+
+    onValue(ref(db, "rapat"), snap => {
+      daftar.innerHTML = "";
+      if (!snap.exists()) {
+        daftar.innerHTML = "<p>Tidak ada rapat.</p>";
+        return;
+      }
+
+      Object.entries(snap.val()).reverse().forEach(([key, data]) => {
+        const div = document.createElement("div");
+        div.className = "rapat-item";
+        div.innerHTML = `
+          <h2>${data.judul || "(Tanpa Judul)"}</h2>
+          <p><b>Dibuat oleh:</b> ${data.namaPemimpin || "-"}</p>
+          <button onclick="hapus('${key}')">🗑️ Hapus</button>
+        `;
+        daftar.appendChild(div);
+      });
+    });
+
+    window.hapus = function(kunci) {
+      if (confirm("Yakin ingin menghapus rapat ini?")) {
+        remove(ref(db, "rapat/" + kunci));
+      }
+    };
+  </script>
+</body>
+</html>

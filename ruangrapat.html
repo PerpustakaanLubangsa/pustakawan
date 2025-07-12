@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ruang Rapat</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: #121212;
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      background: #1f1f1f;
+      color: #fff;
+      padding: 1em;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.2em;
+      border-bottom: 1px solid #333;
+      position: relative;
+    }
+
+    #toggleSidebarBtn {
+      display: none;
+      position: absolute;
+      left: 1em;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5em;
+      cursor: pointer;
+    }
+
+    main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    #chatContainer {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #chatBox {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1em;
+      background: #1e1e1e;
+      border-bottom: 1px solid #333;
+    }
+
+    .msg {
+      margin: .75em 0;
+      padding: .6em .9em;
+      background: #2c2c2c;
+      border-radius: 8px;
+      box-shadow: 0 0 4px rgba(0,0,0,0.3);
+    }
+
+    .msg strong { color: #82b1ff; }
+
+    #inputArea {
+      display: flex;
+      padding: 1em;
+      background: #1a1a1a;
+      border-top: 1px solid #333;
+    }
+
+    #inputArea input {
+      flex: 1;
+      padding: .6em;
+      border: 1px solid #555;
+      border-radius: 6px;
+      background: #2b2b2b;
+      color: #e0e0e0;
+    }
+
+    #inputArea button {
+      margin-left: .5em;
+      padding: .6em 1.2em;
+      background: #3f51b5;
+      border: none;
+      color: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #sidebar {
+      width: 280px;
+      background: #1a1a1a;
+      border-left: 1px solid #333;
+      padding: 1em;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+    }
+
+    #sidebar h3 {
+      margin-top: 0;
+    }
+
+    .peserta-item {
+      margin: .5em 0;
+      padding: .7em 1em;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+
+    .peserta-item.green {
+      background-color: #2ecc71;
+    }
+
+    .peserta-item.red {
+      background-color: #e74c3c;
+    }
+
+    #sidebarControls {
+      margin-bottom: 1em;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+    }
+
+    #sidebarControls button {
+      background: #3f51b5;
+      color: white;
+      border: none;
+      padding: .5em;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      #sidebar {
+        position: fixed;
+        right: 0;
+        top: 0;
+        height: 100%;
+        z-index: 999;
+        transform: translateX(100%);
+      }
+      #sidebar.active {
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <button id="toggleSidebarBtn" onclick="toggleSidebar()">☰</button>
+    💬 Ruang Rapat
+  </header>
+
+  <main>
+    <div id="chatContainer">
+      <div id="chatBox">Memuat...</div>
+      <div id="inputArea">
+        <input type="text" id="pesanInput" placeholder="Ketik pesan..." />
+        <button id="kirimBtn" onclick="kirimPesan()">Kirim</button>
+      </div>
+    </div>
+
+    <aside id="sidebar">
+      <h3>Kontrol Pimpinan</h3>
+      <div id="sidebarControls">
+        <button onclick="ubahSemua(true)">Izinkan Semua</button>
+        <button onclick="ubahSemua(false)">Nonizinkan Semua</button>
+      </div>
+      <div id="daftarPeserta">Memuat peserta...</div>
+    </aside>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      databaseURL: "https://pustakawan-26664-default-rtdb.firebaseio.com"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const url = new URLSearchParams(location.search);
+    const id = url.get("id");
+    const idRapat = url.get("rapat");
+    let peran = "peserta";
+    let namaPengguna = "Pengguna";
+
+    const toggleBtn = document.getElementById("toggleSidebarBtn");
+    const sidebar = document.getElementById("sidebar");
+
+    if (!id || !idRapat) {
+      alert("ID atau Rapat tidak ditemukan.");
+      location.href = "rapat.html";
+    }
+
+    firebase.database().ref("pustakawan/" + id).once("value").then(snap => {
+      if (snap.exists()) {
+        namaPengguna = snap.val().nama || namaPengguna;
+        lanjutkan();
+      }
+    });
+
+    function lanjutkan() {
+      db.ref("rapat/" + idRapat).once("value").then(snap => {
+        if (snap.exists()) {
+          const data = snap.val();
+          if (data.dibuatOleh === id) {
+            peran = "pimpinan";
+            if (window.innerWidth <= 768) toggleBtn.style.display = "block";
+            sidebar.style.display = "block";
+            loadDaftarPeserta();
+          } else {
+            sidebar.style.display = "none";
+            toggleBtn.style.display = "none";
+          }
+
+          db.ref(`ruangrapat/${idRapat}/peserta/${id}`).set({
+            nama: namaPengguna,
+            peran: peran
+          });
+
+          monitorChat();
+          monitorIzin();
+        }
+      });
+    }
+
+    function monitorChat() {
+      db.ref(`ruangrapat/${idRapat}/chat`).on("value", snap => {
+        const box = document.getElementById("chatBox");
+        box.innerHTML = "";
+        snap.forEach(child => {
+          const { nama, isi } = child.val();
+          const div = document.createElement("div");
+          div.className = "msg";
+          div.innerHTML = `<strong>${nama}:</strong> ${isi}`;
+          box.appendChild(div);
+        });
+        box.scrollTop = box.scrollHeight;
+      });
+    }
+
+    function monitorIzin() {
+      db.ref(`ruangrapat/${idRapat}/izinPeserta`).on("value", snap => {
+        const izin = snap.val() || {};
+        const boleh = (peran === "pimpinan") || izin[id] === true;
+        document.getElementById("kirimBtn").style.display = boleh ? "inline-block" : "none";
+
+        // Update warna blok peserta secara real-time
+        document.querySelectorAll(".peserta-item").forEach(el => {
+          const uid = el.dataset.uid;
+          const isIzin = izin[uid] === true;
+          el.classList.toggle("green", isIzin);
+          el.classList.toggle("red", !isIzin);
+        });
+      });
+    }
+
+    function kirimPesan() {
+      const isi = document.getElementById("pesanInput").value.trim();
+      if (!isi) return;
+      db.ref(`ruangrapat/${idRapat}/chat`).push({
+        id, nama: namaPengguna, isi, waktu: Date.now()
+      });
+      document.getElementById("pesanInput").value = "";
+    }
+
+    function loadDaftarPeserta() {
+      const daftar = document.getElementById("daftarPeserta");
+      db.ref(`ruangrapat/${idRapat}/peserta`).on("value", snap => {
+        daftar.innerHTML = "";
+        snap.forEach(child => {
+          const uid = child.key;
+          const val = child.val();
+          if (uid !== id) {
+            const div = document.createElement("div");
+            div.className = "peserta-item";
+            div.textContent = val.nama;
+            div.dataset.uid = uid;
+
+            div.onclick = () => {
+              db.ref(`ruangrapat/${idRapat}/izinPeserta/${uid}`).once("value").then(s => {
+                db.ref(`ruangrapat/${idRapat}/izinPeserta/${uid}`).set(!s.val());
+              });
+            };
+
+            daftar.appendChild(div);
+          }
+        });
+      });
+    }
+
+    function ubahSemua(status) {
+      db.ref(`ruangrapat/${idRapat}/peserta`).once("value").then(snap => {
+        const updates = {};
+        snap.forEach(child => {
+          const uid = child.key;
+          if (uid !== id) updates[uid] = status;
+        });
+        db.ref(`ruangrapat/${idRapat}/izinPeserta`).update(updates);
+      });
+    }
+
+    function toggleSidebar() {
+      sidebar.classList.toggle("active");
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rapat</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #121212;
+      color: white;
+      display: flex;
+    }
+    header {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 64px;
+      background: #1e1e1e;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      border-bottom: 1px solid #333;
+      z-index: 1001;
+    }
+    .left-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    header h1 {
+      font-size: 18px;
+      margin: 0;
+    }
+    header small {
+      font-size: 12px;
+      color: #ccc;
+    }
+    .plus-btn {
+      background: #3f51b5;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      font-size: 22px;
+      cursor: pointer;
+    }
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      z-index: 998;
+    }
+    #overlay.show { display: block; }
+    aside {
+      position: fixed;
+      top: 64px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 64px);
+      background: #1f1f1f;
+      padding: 16px;
+      overflow-y: auto;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      z-index: 999;
+    }
+    aside.show {
+      transform: translateX(0);
+    }
+    aside h2 {
+      font-size: 16px;
+      margin-top: 0;
+    }
+    aside a {
+      display: block;
+      color: #ccc;
+      text-decoration: none;
+      padding: 10px;
+      border-bottom: 1px solid #333;
+      margin-bottom: 6px;
+    }
+    aside a:hover {
+      background: #2a2a2a;
+      color: white;
+    }
+    main {
+      flex: 1;
+      padding: 88px 24px 24px;
+      width: 100%;
+    }
+    @media (min-width: 768px) {
+      aside { transform: none !important; }
+      #overlay { display: none !important; }
+      main { margin-left: 240px; }
+    }
+    .form-box {
+      display: none;
+      background: #1e1e1e;
+      border-left: 4px solid #3f51b5;
+      padding: 16px;
+      border-radius: 6px;
+      margin-bottom: 24px;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 8px;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      color: white;
+      border-radius: 6px;
+    }
+    .form-box button {
+      padding: 10px 16px;
+      background: #3f51b5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .rapat-item {
+      background: #1e1e1e;
+      padding: 16px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+    .rapat-item h3 {
+      margin-top: 0;
+      margin-bottom: 4px;
+    }
+    .rapat-item p {
+      margin: 0 0 4px 0;
+      font-size: 14px;
+      color: #ccc;
+    }
+    .rapat-item .action {
+      margin-top: 8px;
+    }
+    .rapat-item button {
+      margin-right: 8px;
+      padding: 6px 12px;
+      font-size: 13px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+    }
+    .masuk-btn {
+      background: #3f51b5;
+      color: white;
+    }
+    .hapus-btn {
+      background: #b71c1c;
+      color: white;
+    }
+    .form-verifikasi {
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+<div id="overlay" onclick="tutupSidebar()"></div>
+<header>
+  <div class="left-head">
+    <img src="img/1.png" alt="foto" onclick="toggleSidebar()" />
+    <div>
+      <h1 id="fnamaHeader">Rapat</h1>
+      <small id="fjabatanHeader">Jabatan</small>
+    </div>
+  </div>
+  <button class="plus-btn" onclick="toggleForm()">+</button>
+</header>
+<aside id="sidebar">
+  <h2>📚 Menu</h2>
+  <a href="profil.html?id=" id="linkProfil">👤 Profil</a>
+  <a href="beranda.html?id=" id="linkBeranda">🏠 Beranda</a>
+  <a href="catatan.html?id=" id="linkCatatan">📝 Catatan</a>
+  <a href="chat-umum.html?id=" id="linkChatUmum">💬 Chat Umum</a>
+  <a href="penugasan.html?id=" id="linkPenugasan">📄 Penugasan</a>
+  <a href="rapat.html?id=" id="linkRapat">📆 Rapat</a>
+</aside>
+<main>
+  <div class="form-box" id="formBox">
+    <input type="text" id="judulRapat" placeholder="Judul Rapat" />
+    <input type="text" id="sandiRapat" placeholder="Sandi Rapat" />
+    <button onclick="kirimRapat()">Tambah Rapat</button>
+  </div>
+  <div id="daftarRapat">Memuat daftar rapat...</div>
+</main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, push, set, get, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
+    authDomain: "pustakawan-26664.firebaseapp.com",
+    databaseURL: "https://pustakawan-26664-default-rtdb.firebaseio.com",
+    projectId: "pustakawan-26664",
+    storageBucket: "pustakawan-26664.appspot.com",
+    messagingSenderId: "284579513964",
+    appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const id = new URLSearchParams(location.search).get("id");
+  if (!id) location.href = "index.html";
+
+  let namaPengguna = "Pustakawan";
+
+  get(ref(db, `pustakawan/${id}`)).then(snap => {
+    if (snap.exists()) {
+      const data = snap.val();
+      namaPengguna = data.nama || namaPengguna;
+      document.getElementById("fnamaHeader").textContent = namaPengguna;
+      document.getElementById("fjabatanHeader").textContent = data.jabatan || "";
+    }
+  });
+
+  const daftarRapat = document.getElementById("daftarRapat");
+
+  window.toggleSidebar = () => {
+    document.getElementById("sidebar").classList.toggle("show");
+    document.getElementById("overlay").classList.toggle("show");
+  };
+  window.tutupSidebar = () => {
+    document.getElementById("sidebar").classList.remove("show");
+    document.getElementById("overlay").classList.remove("show");
+  };
+  window.toggleForm = () => {
+    const form = document.getElementById("formBox");
+    form.style.display = form.style.display === "block" ? "none" : "block";
+  };
+
+  const updateLinkWithID = id => {
+    ["linkProfil", "linkBeranda", "linkCatatan", "linkChatUmum", "linkPenugasan", "linkRapat"]
+      .forEach(link => {
+        const el = document.getElementById(link);
+        if (el) el.href += id;
+      });
+  };
+  updateLinkWithID(id);
+
+  window.kirimRapat = () => {
+    const judul = document.getElementById("judulRapat").value.trim();
+    const sandi = document.getElementById("sandiRapat").value.trim();
+    if (!judul || !sandi) return;
+
+    push(ref(db, "rapat"), {
+      judul,
+      sandi,
+      dibuatOleh: id,
+      namaPemimpin: namaPengguna,
+      waktu: Date.now()
+    }).then(() => {
+      document.getElementById("judulRapat").value = "";
+      document.getElementById("sandiRapat").value = "";
+      document.getElementById("formBox").style.display = "none";
+    });
+  };
+
+  onValue(ref(db, "rapat"), snap => {
+    daftarRapat.innerHTML = "";
+    if (!snap.exists()) {
+      daftarRapat.innerHTML = "<p>Belum ada rapat.</p>";
+      return;
+    }
+
+    Object.entries(snap.val()).reverse().forEach(([key, data]) => {
+      const div = document.createElement("div");
+      div.className = "rapat-item";
+      div.innerHTML = `
+        <h3>${data.judul}</h3>
+        <p>Dibuat oleh: ${data.namaPemimpin}</p>
+        <div class="action">
+          <button class="masuk-btn" onclick="toggleMasuk('${key}')">Masuk</button>
+          <button class="hapus-btn" onclick="toggleHapus('${key}')">Hapus</button>
+        </div>
+        <div class="form-verifikasi" id="masuk-${key}" style="display:none;">
+          <input type="password" placeholder="Sandi rapat" id="sandi-masuk-${key}" />
+          <button onclick="verifikasiMasuk('${key}', '${data.sandi}')">Lanjut</button>
+        </div>
+        <div class="form-verifikasi" id="hapus-${key}" style="display:none;">
+          <input type="password" placeholder="Sandi untuk hapus" id="sandi-hapus-${key}" />
+          <button onclick="verifikasiHapus('${key}', '${data.sandi}')">Hapus</button>
+        </div>`;
+      daftarRapat.appendChild(div);
+    });
+  });
+
+  window.toggleMasuk = key => {
+    document.getElementById(`masuk-${key}`).style.display = "block";
+    document.getElementById(`hapus-${key}`).style.display = "none";
+  };
+
+  window.toggleHapus = key => {
+    document.getElementById(`hapus-${key}`).style.display = "block";
+    document.getElementById(`masuk-${key}`).style.display = "none";
+  };
+
+window.verifikasiMasuk = (key, sandi) => {
+  const input = document.getElementById(`sandi-masuk-${key}`).value.trim();
+  if (input === sandi) {
+    get(ref(db, `rapat/${key}`)).then(snap => {
+      if (snap.exists()) {
+        const rapat = snap.val();
+        const peran = (rapat.dibuatOleh === id) ? "pimpinan" : "peserta";
+        location.href = `ruangrapat.html?id=${id}&rapat=${key}&peran=${peran}`;
+      }
+    });
+  } else {
+    document.getElementById(`sandi-masuk-${key}`).value = "";
+  }
+};
+
+  window.verifikasiHapus = (key, sandi) => {
+    const input = document.getElementById(`sandi-hapus-${key}`).value.trim();
+    if (input === sandi) {
+      remove(ref(db, "rapat/" + key));
+    } else {
+      document.getElementById(`sandi-hapus-${key}`).value = "";
+    }
+  };
+</script>
+
+</body>
+</html>
+
