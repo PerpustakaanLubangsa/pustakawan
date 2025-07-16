@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profil Pustakawan</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: #121212;
+      color: white;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      height: 64px;
+      padding: 0 16px;
+      background: #1e1e1e;
+      border-bottom: 1px solid #333;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+    }
+
+    .back-btn {
+      background: linear-gradient(135deg, #fdd835, #fbc02d);
+      color: #121212;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      transition: background 0.2s ease;
+    }
+
+    .back-btn:hover {
+      background: linear-gradient(135deg, #fff176, #fbc02d);
+    }
+
+    main {
+      padding: 88px 24px 24px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .info {
+      margin-bottom: 16px;
+    }
+
+    .info label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+      text-align: left;
+    }
+
+    .info input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      background: #2a2a2a;
+      color: #ccc;
+      border: 1px solid #444;
+      border-radius: 6px;
+    }
+
+    input:read-only {
+      background: #2a2a2a;
+      color: #ccc;
+      border-color: #333;
+    }
+
+    #notif {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 14px;
+      color: #fdd835;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <button class="back-btn" onclick="history.back()">← Kembali</button>
+  </header>
+
+  <main>
+    <div id="profilBox">
+      <div class="info"><label>Nama</label><input id="fnama" readonly /></div>
+      <div class="info"><label>Anggota Sejak</label><input id="fsejak" readonly /></div>
+      <div class="info"><label>Jabatan</label><input id="fjabatan" readonly /></div>
+      <div class="info"><label>Nomor Telepon</label><input id="ftelepon" readonly /></div>
+      <div class="info"><label>Email</label><input id="femail" readonly /></div>
+      <div class="info"><label>Alamat</label><input id="falamat" readonly /></div>
+      <div class="info"><label>Tempat Tanggal Lahir</label><input id="fttl" readonly /></div>
+      <div class="info"><label>Instagram</label><input id="fig" readonly /></div>
+      <div class="info"><label>Facebook</label><input id="ffb" readonly /></div>
+      <div class="info"><label>TikTok</label><input id="ftiktok" readonly /></div>
+      <div id="notif"></div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
+      authDomain: "pustakawan-26664.firebaseapp.com",
+      projectId: "pustakawan-26664",
+      storageBucket: "pustakawan-26664.appspot.com",
+      messagingSenderId: "284579513964",
+      appId: "1:284579513964:web:b45f73ac287e1f49eeba49",
+      databaseURL: "https://pustakawan-26664-default-rtdb.firebaseio.com"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const urlParams = new URLSearchParams(location.search);
+    const id = urlParams.get("id");
+
+    const refs = {
+      fnama: document.getElementById("fnama"),
+      fsejak: document.getElementById("fsejak"),
+      fjabatan: document.getElementById("fjabatan"),
+      ftelepon: document.getElementById("ftelepon"),
+      femail: document.getElementById("femail"), // tambahkan email di sini
+      falamat: document.getElementById("falamat"),
+      fttl: document.getElementById("fttl"),
+      fig: document.getElementById("fig"),
+      ffb: document.getElementById("ffb"),
+      ftiktok: document.getElementById("ftiktok"),
+    };
+
+    const notif = document.getElementById("notif");
+
+    function tampilNotif(teks, warna = "#fdd835") {
+      notif.textContent = teks;
+      notif.style.color = warna;
+    }
+
+    async function muatProfil() {
+      if (!id) {
+        tampilNotif("ID tidak ditemukan di URL.", "red");
+        return;
+      }
+
+      const refData = ref(db, `pustakawan/${id}`);
+      const snap = await get(refData);
+
+      if (snap.exists()) {
+        const data = snap.val();
+        refs.fnama.value = data.nama || "";
+        refs.fsejak.value = new Date(data.sejak || Date.now()).toLocaleDateString("id-ID");
+        refs.fjabatan.value = data.jabatan || "";
+        refs.ftelepon.value = data.telepon || "";
+        refs.femail.value = data.email || ""; // ambil data email dari Firebase
+        refs.falamat.value = data.alamat || "";
+        refs.fttl.value = data.ttl || "";
+        refs.fig.value = data.ig || "";
+        refs.ffb.value = data.fb || "";
+        refs.ftiktok.value = data.tiktok || "";
+      } else {
+        tampilNotif("Profil tidak ditemukan", "red");
+      }
+    }
+
+    muatProfil();
+  </script>
+</body>
+</html>

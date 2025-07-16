@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      background-color: #101010;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+
+    form {
+      width: 100%;
+      max-width: 320px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      background-color: #1b1b1b;
+      color: white;
+      font-size: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #222;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #2c2c2c;
+    }
+
+    .tamu-link {
+      margin-top: 16px;
+      color: #bbb;
+      font-size: 14px;
+      text-decoration: underline;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .tamu-link:hover {
+      color: white;
+    }
+
+    .error {
+      color: #f44336;
+      font-size: 13px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Login Pustakawan</h1>
+  <div id="errorBox" class="error" style="display:none;"></div>
+
+  <form onsubmit="masuk(event)">
+    <input
+      type="text"
+      id="idInput"
+      placeholder="ID Pustakawan"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
+    />
+    <button type="submit">Masuk</button>
+  </form>
+
+  <div class="tamu-link" onclick="masukTamu()">Masuk sebagai Tamu</div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
+      authDomain: "pustakawan-26664.firebaseapp.com",
+      projectId: "pustakawan-26664",
+      storageBucket: "pustakawan-26664.appspot.com",
+      messagingSenderId: "284579513964",
+      appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const errorBox = document.getElementById("errorBox");
+
+    window.masuk = async function (event) {
+      event.preventDefault();
+
+      const id = document.getElementById("idInput").value.trim();
+      if (!id) {
+        tampilkanError("Silakan masukkan ID terlebih dahulu.");
+        return;
+      }
+
+      try {
+        const snap = await get(ref(db, `pustakawan/${id}`));
+        if (snap.exists()) {
+          location.href = `welcome.html?id=${id}`;
+        } else {
+          tampilkanError("ID tidak ditemukan. Pastikan ID Anda valid.");
+        }
+      } catch (err) {
+        tampilkanError("Terjadi kesalahan saat mengakses server.");
+        console.error(err);
+      }
+    };
+
+    window.masukTamu = function () {
+      location.href = "welcome.html";
+    };
+
+    function tampilkanError(teks) {
+      errorBox.textContent = teks;
+      errorBox.style.display = "block";
+    }
+  </script>
+</body>
+</html>

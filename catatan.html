@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Catatan Pribadi</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: #121212;
+      color: white;
+      display: flex;
+    }
+
+    header {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 64px;
+      background: #1e1e1e;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      border-bottom: 1px solid #333;
+      z-index: 1001;
+    }
+
+    header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 12px;
+      cursor: pointer;
+    }
+
+    header h1 {
+      font-size: 18px;
+      margin: 0;
+    }
+
+    header small {
+      font-size: 12px;
+      color: #ccc;
+    }
+
+    aside {
+      position: fixed;
+      top: 64px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 64px);
+      background: #1f1f1f;
+      padding: 24px 16px;
+      overflow-y: auto;
+      z-index: 1002;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    aside.show {
+      transform: translateX(0);
+    }
+
+    @media (min-width: 768px) {
+      aside {
+        transform: none !important;
+      }
+    }
+
+    aside h2 {
+      font-size: 18px;
+      margin-top: 0;
+      margin-bottom: 24px;
+    }
+
+    aside a {
+       display: block;
+  color: #ccc;
+  text-decoration: none;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 8px;
+  background: #2a2a2a;
+  transition: background 0.2s;
+}
+    aside a:hover {
+      background: #2a2a2a;
+      color: white;
+    }
+
+    main {
+      flex: 1;
+      padding: 88px 24px 24px;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      main {
+        margin-left: 240px;
+      }
+    }
+
+    #formArea {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    #inputCatatan {
+      width: 100%;
+      height: 40px;
+      font-size: 16px;
+      padding: 0 12px;
+      background: #2a2a2a;
+      color: white;
+      border: 1px solid #444;
+      border-radius: 20px;
+    }
+
+    #formArea button {
+      align-self: flex-end;
+      width: 40px;
+      height: 40px;
+      font-size: 24px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      cursor: pointer;
+    }
+
+    #peringatan {
+      color: #fdd835;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .item {
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .item button {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      font-size: 14px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+
+    #overlay.show {
+      display: block;
+    }
+
+    @media (min-width: 768px) {
+      #overlay {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="overlay" onclick="tutupSidebar()"></div>
+
+  <header>
+    <img src="img/1.png" alt="Foto" onclick="toggleSidebar()" />
+    <div style="flex-grow: 1;">
+      <h1 id="fnamaHeader">Catatan</h1>
+      <small id="fjabatanHeader"></small>
+    </div>
+  </header>
+
+    <aside id="sidebar">
+    <h2>📚 Menu</h2>
+    <a href="profil.html?id=" id="linkProfil">👤 Profil</a>
+    <a href="beranda.html?id=" id="linkBeranda">🏠 Beranda</a>
+    <a href="penugasan.html?id=" id="linkPenugasan">📄 Penugasan</a>
+    <a href="catatan.html?id=" id="linkCatatan">📔 Catatan</a>
+    <a href="chat.html?id=" id="linkChat">💬 Chat</a>
+    <a href="chat-umum.html?id=" id="linkChatUmum">💬 Chat Umum</a>
+    <a href="rapat.html?id=" id="linkRapat">📅 Rapat</a>
+    <a href="daftarpustakawan.html?id=" id="linkDaftarPustakawan">👤 Daftar Pustakawan</a>
+  </aside>
+  
+  <main>
+    <div id="peringatan"></div>
+
+    <div id="formArea">
+      <input id="inputCatatan" placeholder="Tulis catatan pribadi..." />
+      <button onclick="tambahCatatan()">+</button>
+    </div>
+
+    <div id="daftarCatatan">Memuat catatan...</div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getDatabase, ref, get, push, set, remove
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
+      authDomain: "pustakawan-26664.firebaseapp.com",
+      projectId: "pustakawan-26664",
+      storageBucket: "pustakawan-26664.appspot.com",
+      messagingSenderId: "284579513964",
+      appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const urlParams = new URLSearchParams(location.search);
+    const id = urlParams.get("id");
+
+    if (!id) {
+      document.body.innerHTML = "<main style='padding:64px 24px;font-size:18px;'>Halaman ini hanya dapat diakses oleh pustakawan.</main>";
+      throw new Error("Akses ditolak");
+    }
+
+    const namaHeader = document.getElementById("fnamaHeader");
+    const jabatanHeader = document.getElementById("fjabatanHeader");
+    const daftarCatatan = document.getElementById("daftarCatatan");
+    const peringatan = document.getElementById("peringatan");
+
+     const linkIDs = [
+      "linkProfil",
+      "linkBeranda",
+      "linkPenugasan",
+      "linkCatatan",
+      "linkChat",
+      "linkChatUmum",
+      "linkRapat",
+      "linkDaftarPustakawan"
+    ];
+    linkIDs.forEach(lid => {
+      const el = document.getElementById(lid);
+      if (el && id) el.href += id;
+    });
+
+    async function muatProfil() {
+      const snap = await get(ref(db, `pustakawan/${id}`));
+      if (snap.exists()) {
+        const data = snap.val();
+        namaHeader.textContent = data.nama || "Catatan";
+        jabatanHeader.textContent = data.jabatan || "";
+      }
+    }
+
+    async function tampilCatatan() {
+      const refCatatan = ref(db, `catatan/${id}`);
+      const snap = await get(refCatatan);
+      daftarCatatan.innerHTML = "";
+      if (snap.exists()) {
+        const data = Object.entries(snap.val());
+        if (data.length >= 20) {
+          peringatan.textContent = "Batas maksimal 20 catatan. Hapus salah satu untuk menambah baru.";
+        } else {
+          peringatan.textContent = "";
+        }
+
+        data.reverse().forEach(([key, val]) => {
+          const div = document.createElement("div");
+          div.className = "item";
+          div.innerHTML = `
+            <p>${val}</p>
+            <button onclick="hapusCatatan('${key}')">Hapus</button>
+          `;
+          daftarCatatan.appendChild(div);
+        });
+      } else {
+        daftarCatatan.innerHTML = "<p>Belum ada catatan.</p>";
+      }
+    }
+
+    window.tambahCatatan = async function () {
+      const input = document.getElementById("inputCatatan");
+      const teks = input.value.trim();
+      if (!teks) return alert("Catatan kosong.");
+
+      const refCatatan = ref(db, `catatan/${id}`);
+      const snap = await get(refCatatan);
+      const data = snap.exists() ? Object.entries(snap.val()) : [];
+
+      if (data.length >= 20) {
+        alert("Sudah mencapai 20 catatan. Hapus salah satu dulu.");
+        return;
+      }
+
+      await set(push(refCatatan), teks);
+      input.value = "";
+      tampilCatatan();
+    };
+
+    window.hapusCatatan = async function (key) {
+      await remove(ref(db, `catatan/${id}/${key}`));
+      tampilCatatan();
+    };
+
+    muatProfil();
+    tampilCatatan();
+
+    window.toggleSidebar = () => {
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("overlay");
+      const show = !sidebar.classList.contains("show");
+      sidebar.classList.toggle("show", show);
+      overlay.classList.toggle("show", show);
+    };
+
+    window.tutupSidebar = () => {
+      document.getElementById("sidebar").classList.remove("show");
+      document.getElementById("overlay").classList.remove("show");
+    };
+  </script>
+</body>
+</html>

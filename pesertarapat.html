@@ -1,0 +1,333 @@
+<!-- Versi final pesertarapat.html dengan tombol voting tidak menerobos layar -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Peserta Rapat</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #f0f2f5;
+      color: #333;
+    }
+
+    #wrapper {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 1.5rem;
+      background: #ffffff;
+      border-bottom: 1px solid #ddd;
+      word-wrap: break-word;
+    }
+
+    .msg {
+      margin-bottom: 1rem;
+      padding: 0.75rem 1rem;
+      background: #eef1f5;
+      border-radius: 8px;
+      max-width: 100%;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+
+    .msg strong {
+      font-weight: 600;
+      color: #2c3e50;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .msg span {
+      display: block;
+      white-space: pre-wrap;
+    }
+
+    #controls {
+      display: flex;
+      gap: 0.5rem;
+      padding: 1rem 1.5rem;
+      background: #f9f9f9;
+      border-top: 1px solid #ccc;
+      align-items: flex-end;
+    }
+
+    #controls textarea {
+      flex: 1;
+      padding: 0.6rem 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      display: none;
+      resize: none;
+      min-height: 40px;
+      max-height: 200px;
+      overflow-y: auto;
+      line-height: 1.4;
+      font-family: 'Inter', sans-serif;
+    }
+
+    #controls button {
+      padding: 0.6rem 1rem;
+      border: none;
+      border-radius: 6px;
+      background: #4a90e2;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    #controls button:hover {
+      background: #3b7dc4;
+    }
+
+    #kirimBtn {
+      display: none;
+    }
+
+    #votingBox {
+      display: none;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: #eaf3ff;
+      padding: 1.2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      z-index: 100;
+    }
+
+    #votingBox h3 {
+      margin: 0 0 1rem;
+      font-size: 1.2rem;
+      color: #2a5885;
+    }
+
+    #opsiContainer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    #opsiContainer button {
+      flex-shrink: 0;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      background: #4a90e2;
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s;
+      word-break: break-word;
+      max-width: 100%;
+    }
+
+    #opsiContainer button:hover {
+      background: #3b7dc4;
+    }
+
+    #countdown {
+      margin-top: 1rem;
+      font-weight: 500;
+      color: #444;
+    }
+
+    @media (max-width: 600px) {
+      #controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      #opsiContainer button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="wrapper">
+  <div id="votingBox">
+    <h3 id="votingJudul"></h3>
+    <div id="opsiContainer"></div>
+    <p id="countdown"></p>
+  </div>
+
+  <div id="chat"></div>
+
+  <div id="controls">
+    <button id="ajukanBtn">🙋 Ajukan Bicara</button>
+    <textarea id="inputChat" placeholder="Ketik pesan..."></textarea>
+    <button id="kirimBtn">Kirim</button>
+  </div>
+</div>
+
+<audio id="audioVoting" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg"></audio>
+<audio id="audioIzinkan" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+<audio id="audioTolak" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
+    authDomain: "pustakawan-26664.firebaseapp.com",
+    databaseURL: "https://pustakawan-26664-default-rtdb.firebaseio.com",
+    projectId: "pustakawan-26664",
+    storageBucket: "pustakawan-26664.appspot.com",
+    messagingSenderId: "284579513964",
+    appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get('id'), rapatId = urlParams.get('rapat');
+
+  const chatBox = document.getElementById('chat');
+  const ajukanBtn = document.getElementById('ajukanBtn');
+  const inputChat = document.getElementById('inputChat');
+  const kirimBtn = document.getElementById('kirimBtn');
+  const votingBox = document.getElementById('votingBox');
+  const votingJudul = document.getElementById('votingJudul');
+  const opsiContainer = document.getElementById('opsiContainer');
+  const countdown = document.getElementById('countdown');
+  const audioVoting = document.getElementById('audioVoting');
+  const audioIzinkan = document.getElementById('audioIzinkan');
+  const audioTolak = document.getElementById('audioTolak');
+
+  let namaPengguna = id;
+  let isInitialLoad = true;
+
+  async function initNama() {
+    const snap = await db.ref(`pustakawan/${id}/nama`).once('value');
+    if (snap.exists()) namaPengguna = snap.val();
+  }
+
+  initNama();
+
+  function tampilkanChat(nama, isi, animasi = false) {
+    const el = document.createElement('div');
+    el.className = 'msg';
+    const namaEl = document.createElement('strong'); namaEl.textContent = nama;
+    const isiEl = document.createElement('span');
+    el.append(namaEl, isiEl);
+    chatBox.appendChild(el);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    if (['📊', '✅', '❌', '🗳️'].includes(nama)) {
+      isiEl.innerHTML = isi;
+    } else if (animasi) {
+      ketikSatuPerSatu(isi, isiEl, 0);
+    } else {
+      isiEl.textContent = isi;
+    }
+  }
+
+  function ketikSatuPerSatu(teks, el, i) {
+    if (i < teks.length) {
+      el.textContent += teks.charAt(i);
+      setTimeout(() => ketikSatuPerSatu(teks, el, i + 1), 20);
+    }
+  }
+
+  db.ref(`rapat/${rapatId}/chat`).on('child_added', snap => {
+    const data = snap.val();
+    tampilkanChat(data.nama, data.isi, !isInitialLoad);
+  });
+
+  setTimeout(() => {
+    isInitialLoad = false;
+  }, 1000);
+
+  ajukanBtn.onclick = async () => {
+    await initNama();
+    db.ref(`rapat/${rapatId}/permintaan/${id}`).set({ nama: namaPengguna });
+    ajukanBtn.disabled = true;
+  };
+
+  db.ref(`rapat/${rapatId}/respon/${id}`).on('value', snap => {
+    const val = snap.val();
+    if (!val) return;
+
+    if (val === 'izinkan') {
+      inputChat.style.display = 'inline';
+      kirimBtn.style.display = 'inline';
+      audioIzinkan.play(); navigator.vibrate?.(200);
+    } else if (val === 'tolak') {
+      ajukanBtn.disabled = false;
+      audioTolak.play(); navigator.vibrate?.(200);
+    }
+
+    db.ref(`rapat/${rapatId}/respon/${id}`).remove();
+  });
+
+  inputChat.addEventListener('input', () => {
+    inputChat.style.height = 'auto';
+    inputChat.style.height = inputChat.scrollHeight + 'px';
+  });
+
+  kirimBtn.onclick = async () => {
+    const teks = inputChat.value.trim();
+    if (!teks) return;
+    await initNama();
+    db.ref(`rapat/${rapatId}/chat/${Date.now()}`).set({
+      nama: namaPengguna,
+      isi: teks
+    });
+    inputChat.value = '';
+    inputChat.style.height = '40px';
+    inputChat.style.display = 'none';
+    kirimBtn.style.display = 'none';
+    ajukanBtn.disabled = false;
+  };
+
+  db.ref(`rapat/${rapatId}/voting`).on('value', snap => {
+    const data = snap.val();
+    if (!data) {
+      votingBox.style.display = 'none';
+      return;
+    }
+
+    votingJudul.textContent = data.judul;
+    opsiContainer.innerHTML = '';
+    votingBox.style.display = 'block';
+    audioVoting.play(); navigator.vibrate?.(300);
+
+    let sudahPilih = false;
+    data.opsi.forEach(opsi => {
+      const btn = document.createElement('button');
+      btn.textContent = opsi;
+      btn.onclick = () => {
+        if (sudahPilih) return;
+        db.ref(`rapat/${rapatId}/jawabanVoting/${id}`).set(opsi);
+        sudahPilih = true;
+        opsiContainer.innerHTML = "<p style='margin-top:10px;'>✅ Jawaban Anda telah dikirim.</p>";
+      };
+      opsiContainer.appendChild(btn);
+    });
+
+    const mulai = data.waktuMulai;
+    const interval = setInterval(() => {
+      const sisa = 10 - Math.floor((Date.now() - mulai) / 1000);
+      countdown.textContent = `⏳ ${sisa} detik tersisa`;
+      if (sisa <= 0) {
+        clearInterval(interval);
+        votingBox.style.display = 'none';
+      }
+    }, 500);
+  });
+</script>
+
+</body>
+</html>

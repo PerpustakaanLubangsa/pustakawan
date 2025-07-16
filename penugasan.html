@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Penugasan</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #121212;
+      color: white;
+      display: flex;
+    }
+
+    header {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 64px;
+      background: #1e1e1e;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      border-bottom: 1px solid #333;
+      z-index: 1001;
+    }
+
+    .left-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    header h1 {
+      font-size: 18px;
+      margin: 0;
+    }
+
+    header small {
+      font-size: 12px;
+      color: #ccc;
+    }
+
+    .plus-btn {
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 22px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      z-index: 998;
+    }
+
+    #overlay.show {
+      display: block;
+    }
+
+   aside {
+      position: fixed;
+      top: 64px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 64px);
+      background: #1f1f1f;
+      padding: 24px 16px;
+      overflow-y: auto;
+      z-index: 1002;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    aside.show {
+      transform: translateX(0);
+    }
+
+    @media (min-width: 768px) {
+      aside {
+        transform: none !important;
+      }
+    }
+
+    aside h2 {
+      font-size: 18px;
+      margin-top: 0;
+      margin-bottom: 24px;
+    }
+
+        aside a {
+       display: block;
+  color: #ccc;
+  text-decoration: none;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 8px;
+  background: #2a2a2a;
+  transition: background 0.2s;
+}
+
+    aside a:hover {
+      background: #2a2a2a;
+      color: white;
+    }
+    main {
+      flex: 1;
+      padding: 88px 24px 24px;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      aside {
+        transform: none !important;
+      }
+
+      #overlay {
+        display: none !important;
+      }
+
+      main {
+        margin-left: 240px;
+      }
+    }
+
+    .form-box {
+      display: none;
+      background: #1e1e1e;
+      border-left: 4px solid #3f51b5;
+      padding: 16px;
+      border-radius: 6px;
+      margin-bottom: 24px;
+    }
+
+    .bubble-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .bubble {
+      background: #2a2a2a;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 14px;
+    }
+
+    input[type="text"], select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 8px;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      color: white;
+      border-radius: 6px;
+    }
+
+    .form-box button {
+      padding: 10px 16px;
+      background: #3f51b5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .task {
+      background: #1e1e1e;
+      padding: 16px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+
+    .task ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .task li {
+      margin-bottom: 6px;
+    }
+
+    .task textarea {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      color: white;
+      border-radius: 6px;
+    }
+
+    small {
+      display: block;
+      margin-top: 8px;
+      font-size: 13px;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+
+<div id="overlay" onclick="tutupSidebar()"></div>
+
+<header>
+  <div class="left-head">
+    <img src="img/1.png" alt="foto" onclick="toggleSidebar()" />
+    <div>
+      <h1 id="fnamaHeader">Penugasan</h1>
+      <small id="fjabatanHeader">Jabatan</small>
+    </div>
+  </div>
+  <button class="plus-btn" onclick="toggleForm()">+</button>
+</header>
+
+ <aside id="sidebar">
+    <h2>📚 Menu</h2>
+    <a href="profil.html?id=" id="linkProfil">👤 Profil</a>
+    <a href="beranda.html?id=" id="linkBeranda">🏠 Beranda</a>
+    <a href="penugasan.html?id=" id="linkPenugasan">📄 Penugasan</a>
+    <a href="catatan.html?id=" id="linkCatatan">📔 Catatan</a>
+    <a href="chat.html?id=" id="linkChat">💬 Chat</a>
+    <a href="chat-umum.html?id=" id="linkChatUmum">💬 Chat Umum</a>
+    <a href="rapat.html?id=" id="linkRapat">📅 Rapat</a>
+    <a href="daftarpustakawan.html?id=" id="linkDaftarPustakawan">👤 Daftar Pustakawan</a>
+  </aside>
+
+<main>
+  <div class="form-box" id="formBox">
+    <select id="seksiTujuan">
+      <option disabled selected>Pilih Seksi Tujuan</option>
+      <option>Seluruh Pustakawan</option>
+      <option>Harian</option>
+      <option>Pengembangan Minat Baca</option>
+      <option>Pengadaan & Jaringan</option>
+      <option>Layanan Pustaka</option>
+      <option>Basis Data & Inventaris</option>
+    </select>
+    <div class="bubble-list" id="previewList"></div>
+    <input type="text" id="inputItem" placeholder="Tulis tugas lalu tekan Enter" />
+    <button onclick="kirimTugas()">Tambah Tugas</button>
+  </div>
+
+  <div id="taskList">Memuat tugas...</div>
+</main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, push, set, get, update, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
+    authDomain: "pustakawan-26664.firebaseapp.com",
+    projectId: "pustakawan-26664",
+    storageBucket: "pustakawan-26664.appspot.com",
+    messagingSenderId: "284579513964",
+    appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const id = new URLSearchParams(location.search).get("id");
+  if (!id) location.href = "index.html";
+
+  const taskList = document.getElementById("taskList");
+  const formBox = document.getElementById("formBox");
+  const previewList = document.getElementById("previewList");
+  const inputItem = document.getElementById("inputItem");
+  const bubbleData = [];
+
+  let namaPengguna = "Pustakawan";
+
+  get(ref(db, `pustakawan/${id}`)).then(snap => {
+    if (snap.exists()) {
+      const data = snap.val();
+      namaPengguna = data.nama || namaPengguna;
+      document.getElementById("fnamaHeader").textContent = namaPengguna;
+      document.getElementById("fjabatanHeader").textContent = data.jabatan || "";
+    }
+  });
+
+  const linkIDs = [
+      "linkProfil",
+      "linkBeranda",
+      "linkPenugasan",
+      "linkCatatan",
+      "linkChat",
+      "linkChatUmum",
+      "linkRapat",
+      "linkDaftarPustakawan"
+    ];
+
+linkIDs.forEach(linkID => {
+  const el = document.getElementById(linkID);
+  if (el && id) {
+    const href = new URL(el.getAttribute("href"), location.href);
+    href.searchParams.set("id", id);
+    el.setAttribute("href", href.toString());
+  }
+});
+
+
+  window.toggleSidebar = () => {
+    document.getElementById("sidebar").classList.toggle("show");
+    document.getElementById("overlay").classList.toggle("show");
+  };
+
+  window.tutupSidebar = () => {
+    document.getElementById("sidebar").classList.remove("show");
+    document.getElementById("overlay").classList.remove("show");
+  };
+
+  window.toggleForm = () => {
+    formBox.style.display = formBox.style.display === "block" ? "none" : "block";
+  };
+
+  inputItem.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const teks = inputItem.value.trim();
+      if (teks) {
+        bubbleData.push(teks);
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.textContent = teks;
+        previewList.appendChild(bubble);
+        inputItem.value = "";
+      }
+    }
+  });
+
+  window.kirimTugas = () => {
+    const seksi = document.getElementById("seksiTujuan").value;
+    if (!seksi || bubbleData.length === 0) return alert("Lengkapi seksi dan isi tugas.");
+
+    const isi = bubbleData.map(t => ({ teks: t, selesai: false }));
+    push(ref(db, "penugasan"), {
+      untuk: seksi,
+      oleh: namaPengguna,
+      isi,
+      catatan: "",
+      waktu: Date.now()
+    });
+
+    document.getElementById("seksiTujuan").selectedIndex = 0;
+    previewList.innerHTML = "";
+    bubbleData.length = 0;
+    formBox.style.display = "none";
+  };
+
+  onValue(ref(db, "penugasan"), snap => {
+    taskList.innerHTML = "";
+    if (!snap.exists()) {
+      taskList.innerHTML = "<p>Tidak ada tugas.</p>";
+      return;
+    }
+
+    Object.entries(snap.val()).reverse().forEach(([key, data]) => {
+      const div = document.createElement("div");
+      div.className = "task";
+      div.innerHTML = `<h3>${data.untuk}</h3><p><i>Dibuat oleh: ${data.oleh}</i></p><ul></ul>`;
+      const ul = div.querySelector("ul");
+
+      Object.entries(data.isi).forEach(([i, item]) => {
+        const li = document.createElement("li");
+        const cek = document.createElement("input");
+        cek.type = "checkbox";
+        cek.checked = item.selesai;
+        cek.disabled = !!data.catatan;
+        cek.onchange = () => {
+          update(ref(db, `penugasan/${key}/isi/${i}`), { selesai: cek.checked });
+        };
+        li.appendChild(cek);
+        li.append(" " + item.teks);
+        ul.appendChild(li);
+      });
+
+      const semuaSelesai = Object.values(data.isi).every(i => i.selesai);
+      if (semuaSelesai && !data.catatan) {
+        const textarea = document.createElement("textarea");
+        textarea.placeholder = "Catatan penyelesaian...";
+        const btn = document.createElement("button");
+        btn.textContent = "Simpan Catatan";
+        btn.onclick = () => {
+          const teks = textarea.value.trim();
+          if (!teks) return alert("Isi catatan terlebih dahulu.");
+          update(ref(db, `penugasan/${key}`), { catatan: teks });
+        };
+        div.appendChild(textarea);
+        div.appendChild(btn);
+      }
+
+      if (data.catatan) {
+        const note = document.createElement("small");
+        note.textContent = "Catatan: " + data.catatan;
+        div.appendChild(note);
+      }
+
+      taskList.appendChild(div);
+    });
+  });
+</script>
+
+</body>
+</html>

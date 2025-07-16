@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profil Pustakawan</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: #121212;
+      color: white;
+      display: flex;
+      flex-direction: row;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 64px;
+      background: #1e1e1e;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      border-bottom: 1px solid #333;
+      z-index: 1001;
+    }
+
+    header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 12px;
+      cursor: pointer;
+    }
+
+    header h1 {
+      font-size: 18px;
+      margin: 0;
+    }
+
+    header small {
+      display: block;
+      font-size: 12px;
+      color: #ccc;
+    }
+
+    aside {
+      position: fixed;
+      top: 64px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 64px);
+      background: #1f1f1f;
+      padding: 24px 16px;
+      overflow-y: auto;
+      z-index: 1002;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    aside.show {
+      transform: translateX(0);
+    }
+
+    @media (min-width: 768px) {
+      aside {
+        transform: none !important;
+      }
+    }
+
+    aside h2 {
+      font-size: 18px;
+      margin-top: 0;
+      margin-bottom: 24px;
+    }
+
+    aside a {
+      display: block;
+      color: #ccc;
+      text-decoration: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 8px;
+      background: #2a2a2a;
+      transition: background 0.2s;
+    }
+
+    aside a:hover {
+      background: #2a2a2a;
+      color: white;
+    }
+
+    main {
+      flex: 1;
+      padding: 88px 0 24px;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      main {
+        margin-left: 240px;
+      }
+    }
+
+    #profilBox {
+      width: 100%;
+      padding: 0 24px;
+    }
+
+    .info {
+      margin-bottom: 16px;
+    }
+
+    .info label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+      text-align: left;
+    }
+
+    .info input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      background: #2a2a2a;
+      color: #ccc;
+      border: 1px solid #444;
+      border-radius: 6px;
+    }
+
+    input:read-only {
+      background: #2a2a2a;
+      color: #ccc;
+      border-color: #333;
+    }
+
+    #notif {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 14px;
+      color: #fdd835;
+    }
+
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    #overlay.show {
+      display: block;
+    }
+
+    @media (min-width: 768px) {
+      #overlay {
+        display: none !important;
+      }
+    }
+
+    .tombol-aksi {
+      text-align: center;
+      margin-top: 24px;
+    }
+
+    .tombol-aksi button {
+      padding: 8px 16px;
+      font-size: 14px;
+      margin: 4px;
+      cursor: pointer;
+      background-color: #333;
+      color: #fff;
+      border: 1px solid #555;
+      border-radius: 4px;
+    }
+
+    .tombol-aksi button:hover {
+      background-color: #444;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="overlay" onclick="tutupSidebar()"></div>
+
+  <header>
+    <img id="foto" src="img/1.png" alt="Foto" onclick="toggleSidebar()" />
+    <div>
+      <h1 id="fnamaHeader">Profil Pustakawan</h1>
+      <small id="fjabatanHeader"></small>
+    </div>
+  </header>
+
+  <aside id="sidebar">
+    <h2>📚 Menu</h2>
+    <a href="profil.html?id=" id="linkProfil">👤 Profil</a>
+    <a href="beranda.html?id=" id="linkBeranda">🏠 Beranda</a>
+    <a href="penugasan.html?id=" id="linkPenugasan">📄 Penugasan</a>
+    <a href="catatan.html?id=" id="linkCatatan">📔 Catatan</a>
+    <a href="chat.html?id=" id="linkChat">💬 Chat</a>
+    <a href="chat-umum.html?id=" id="linkChatUmum">💬 Chat Umum</a>
+    <a href="rapat.html?id=" id="linkRapat">📅 Rapat</a>
+    <a href="daftarpustakawan.html?id=" id="linkDaftarPustakawan">👤 Daftar Pustakawan</a>
+  </aside>
+
+  <main>
+    <div id="profilBox">
+      <div class="info"><label>ID</label><input id="fid" readonly /></div>
+      <div class="info"><label>Nama</label><input id="fnama" readonly /></div>
+      <div class="info"><label>Anggota Sejak</label><input id="fsejak" readonly /></div>
+      <div class="info"><label>Jabatan</label><input id="fjabatan" readonly /></div>
+      <div class="info"><label>Nomor Telepon</label><input id="ftelepon" readonly /></div>
+      <div class="info"><label>Email</label><input id="femail" readonly /></div>
+      <div class="info"><label>Alamat</label><input id="falamat" readonly /></div>
+      <div class="info"><label>Tempat Tanggal Lahir</label><input id="fttl" readonly /></div>
+      <div class="info"><label>Instagram</label><input id="fig" readonly /></div>
+      <div class="info"><label>Facebook</label><input id="ffb" readonly /></div>
+      <div class="info"><label>TikTok</label><input id="ftiktok" readonly /></div>
+      <div class="tombol-aksi">
+        <button onclick="aktifkanEdit()">Edit Profil</button>
+        <button onclick="simpanProfil()">Simpan</button>
+      </div>
+      <div id="notif"></div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
+      authDomain: "pustakawan-26664.firebaseapp.com",
+      projectId: "pustakawan-26664",
+      storageBucket: "pustakawan-26664.appspot.com",
+      messagingSenderId: "284579513964",
+      appId: "1:284579513964:web:b45f73ac287e1f49eeba49",
+      databaseURL: "https://pustakawan-26664-default-rtdb.firebaseio.com"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const urlParams = new URLSearchParams(location.search);
+    const id = urlParams.get("id");
+
+    const refs = {
+      fid: document.getElementById("fid"),
+      fnama: document.getElementById("fnama"),
+      fsejak: document.getElementById("fsejak"),
+      fjabatan: document.getElementById("fjabatan"),
+      ftelepon: document.getElementById("ftelepon"),
+      femail: document.getElementById("femail"),
+      falamat: document.getElementById("falamat"),
+      fttl: document.getElementById("fttl"),
+      fig: document.getElementById("fig"),
+      ffb: document.getElementById("ffb"),
+      ftiktok: document.getElementById("ftiktok"),
+      fnamaHeader: document.getElementById("fnamaHeader"),
+      fjabatanHeader: document.getElementById("fjabatanHeader")
+    };
+
+    const notif = document.getElementById("notif");
+
+    function tampilNotif(teks, warna = "#fdd835") {
+      notif.textContent = teks;
+      notif.style.color = warna;
+    }
+
+    async function muatProfil() {
+      if (!id) {
+        tampilNotif("ID tidak ditemukan di URL.", "red");
+        return;
+      }
+
+     const linkIDs = [
+      "linkProfil",
+      "linkBeranda",
+      "linkPenugasan",
+      "linkCatatan",
+      "linkChat",
+      "linkChatUmum",
+      "linkRapat",
+      "linkDaftarPustakawan"
+    ];
+      linkIDs.forEach(linkId => {
+        const el = document.getElementById(linkId);
+        if (el && id) el.href += id;
+      });
+
+      const refData = ref(db, `pustakawan/${id}`);
+      const snap = await get(refData);
+
+      if (snap.exists()) {
+        const data = snap.val();
+        refs.fid.value = id;
+        refs.fnama.value = data.nama || "";
+        refs.fsejak.value = data.sejak || "";
+        refs.fjabatan.value = data.jabatan || "";
+        refs.ftelepon.value = data.telepon || "";
+        refs.femail.value = data.email || "";
+        refs.falamat.value = data.alamat || "";
+        refs.fttl.value = data.ttl || "";
+        refs.fig.value = data.ig || "";
+        refs.ffb.value = data.fb || "";
+        refs.ftiktok.value = data.tiktok || "";
+        refs.fnamaHeader.textContent = data.nama || "(Tanpa Nama)";
+        refs.fjabatanHeader.textContent = data.jabatan || "";
+      } else {
+        tampilNotif("Profil tidak ditemukan", "red");
+      }
+    }
+
+    window.aktifkanEdit = function () {
+      ["fnama", "fsejak", "fjabatan", "ftelepon", "femail", "falamat", "fttl", "fig", "ffb", "ftiktok"]
+        .forEach(key => refs[key].readOnly = false);
+      tampilNotif("Mode edit diaktifkan.", "#4caf50");
+    };
+
+    window.simpanProfil = async function () {
+      if (!id) return tampilNotif("ID tidak valid", "red");
+
+      const data = {
+        nama: refs.fnama.value.trim(),
+        sejak: refs.fsejak.value.trim(),
+        jabatan: refs.fjabatan.value.trim(),
+        telepon: refs.ftelepon.value.trim(),
+        email: refs.femail.value.trim(),
+        alamat: refs.falamat.value.trim(),
+        ttl: refs.fttl.value.trim(),
+        ig: refs.fig.value.trim(),
+        fb: refs.ffb.value.trim(),
+        tiktok: refs.ftiktok.value.trim()
+      };
+
+      try {
+        await update(ref(db, `pustakawan/${id}`), data);
+
+        ["fnama", "fsejak", "fjabatan", "ftelepon", "femail", "falamat", "fttl", "fig", "ffb", "ftiktok"]
+          .forEach(key => refs[key].readOnly = true);
+
+        refs.fnamaHeader.textContent = data.nama || "(Tanpa Nama)";
+        refs.fjabatanHeader.textContent = data.jabatan || "";
+
+        tampilNotif("✅ Profil berhasil disimpan.", "#4caf50");
+      } catch (err) {
+        console.error(err);
+        tampilNotif("❌ Gagal menyimpan profil.", "red");
+      }
+    };
+
+    window.toggleSidebar = () => {
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("overlay");
+      const show = !sidebar.classList.contains("show");
+      sidebar.classList.toggle("show", show);
+      overlay.classList.toggle("show", show);
+    };
+
+    window.tutupSidebar = () => {
+      document.getElementById("sidebar").classList.remove("show");
+      document.getElementById("overlay").classList.remove("show");
+    };
+
+    muatProfil();
+  </script>
+</body>
+</html>
