@@ -1,0 +1,15 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main  # Ganti dengan nama branch utama kamu kalau bukan main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Test run
+        run: echo "Build dan deploy berhasil dijalankan"
