@@ -55,7 +55,7 @@
       cursor: pointer;
     }
 
-    aside {
+   aside {
       position: fixed;
       top: 64px;
       left: 0;
@@ -68,7 +68,7 @@
       transform: translateX(-100%);
       transition: transform 0.3s ease;
     }
-
+    
     aside.show { transform: translateX(0); }
 
     @media (min-width: 768px) {
@@ -162,10 +162,15 @@
   </header>
 
   <aside id="sidebar">
-    <h2>Navigasi</h2>
-    <a href="beranda.html">Beranda</a>
-    <a href="rapat.html">Rapat</a>
-    <a href="penugasan.html">Penugasan</a>
+    <h2>📚 Menu</h2>
+    <a href="profil.html?id=" id="linkProfil">👤 Profil</a>
+    <a href="beranda.html?id=" id="linkBeranda">🏠 Beranda</a>
+    <a href="penugasan.html?id=" id="linkPenugasan">📄 Penugasan</a>
+    <a href="catatan.html?id=" id="linkCatatan">📔 Catatan</a>
+    <a href="chat.html?id=" id="linkChat">💬 Chat</a>
+    <a href="chat-umum.html?id=" id="linkChatUmum">💬 Chat Umum</a>
+    <a href="rapat.html?id=" id="linkRapat">📅 Rapat</a>
+    <a href="daftarpustakawan.html?id=" id="linkDaftarPustakawan">👤 Daftar Pustakawan</a>
   </aside>
 
   <main>
@@ -186,6 +191,20 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+ const linkIDs = [
+      "linkProfil",
+      "linkBeranda",
+      "linkPenugasan",
+      "linkCatatan",
+      "linkChat",
+      "linkChatUmum",
+      "linkRapat",
+      "linkDaftarPustakawan"
+    ];
+    linkIDs.forEach(lid => {
+      const el = document.getElementById(lid);
+      if (el && id) el.href += id;
+    });
 
     function toggleSidebar() {
       document.getElementById("sidebar").classList.toggle("show");
