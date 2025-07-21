@@ -31,11 +31,10 @@
       z-index: 1001;
     }
 
-    header img {
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      margin-right: 12px;
+    header .menu-icon {
+      font-size: 24px;
       cursor: pointer;
+      margin-right: 12px;
     }
 
     header h1 {
@@ -55,7 +54,7 @@
       cursor: pointer;
     }
 
-   aside {
+    aside {
       position: fixed;
       top: 64px;
       left: 0;
@@ -68,7 +67,7 @@
       transform: translateX(-100%);
       transition: transform 0.3s ease;
     }
-    
+
     aside.show { transform: translateX(0); }
 
     @media (min-width: 768px) {
@@ -156,7 +155,7 @@
 </head>
 <body>
   <header>
-    <img src="img/1.png" onclick="toggleSidebar()" />
+    <div class="menu-icon" onclick="toggleSidebar()">☰</div>
     <h1>Daftar Rapat</h1>
     <button onclick="toggleForm()">+</button>
   </header>
@@ -191,7 +190,8 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
- const linkIDs = [
+
+    const linkIDs = [
       "linkProfil",
       "linkBeranda",
       "linkPenugasan",
@@ -203,7 +203,7 @@
     ];
     linkIDs.forEach(lid => {
       const el = document.getElementById(lid);
-      if (el && id) el.href += id;
+      if (el && userId) el.href += userId;
     });
 
     function toggleSidebar() {
@@ -212,7 +212,10 @@
 
     function toggleForm() {
       const form = document.getElementById("formRapat");
-      form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
+      const button = document.querySelector("header button");
+      const isOpen = form.style.display === "block";
+      form.style.display = isOpen ? "none" : "block";
+      button.textContent = isOpen ? "+" : "×";
     }
 
     function buatRapat() {
@@ -235,6 +238,7 @@
         }).then(() => {
           document.getElementById("judul").value = "";
           document.getElementById("formRapat").style.display = "none";
+          document.querySelector("header button").textContent = "+";
         });
       }).catch(err => {
         alert("Gagal mengambil nama pengguna: " + err.message);
@@ -250,9 +254,11 @@
           const id = child.key;
           const div = document.createElement("div");
           div.className = "rapat";
+          const date = new Date(data.waktu).toLocaleString("id-ID");
           div.innerHTML = `
             <div class="rapat-title">${data.judul}</div>
-            <div class="rapat-pembuat">Dibuat oleh: ${data.nama || data.pembuat}</div>
+            <div class="rapat-pembuat">📌 Dibuat oleh: ${data.nama || data.pembuat}</div>
+            <div class="rapat-waktu">🕒 ${date}</div>
             <div class="rapat-buttons">
               <button class="masuk" onclick="masukRapat('${id}', '${data.pembuat}')">Masuk</button>
               ${userId === data.pembuat ? `<button class="hapus" onclick="hapusRapat('${id}')">Hapus</button>` : ""}
