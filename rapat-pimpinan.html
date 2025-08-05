@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pimpinan Rapat</title>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* Styling Dasar dan Header */
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; font-family: 'Inter', sans-serif; background: #f0f2f5; color: #333; }
+    body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; padding-top: 52px; }
+    header { position: fixed; top: 0; left: 0; width: 100%; height: 52px; background: #00BCD4; color: white; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #0097A7; z-index: 1001; }
+    header h1 { font-size: 18px; margin: 0; margin-left: 16px; flex-grow: 1; }
+    header .back-btn { color: white; text-decoration: none; display: flex; align-items: center; font-size: 24px; transition: transform 0.2s; }
+    header .back-btn:active { transform: scale(0.9); }
+    .menu-button { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0 8px; }
+    .dropdown-menu { position: absolute; top: 52px; right: 16px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); min-width: 150px; z-index: 1002; display: none; list-style-type: none; padding: 8px 0; margin: 0; }
+    .dropdown-menu.show { display: block; }
+    .dropdown-menu li a { display: block; padding: 10px 16px; text-decoration: none; color: #333; font-size: 14px; transition: background-color 0.2s; }
+    .dropdown-menu li a:hover { background-color: #f0f2f5; }
+    
+    /* Area Chat dan Voting */
+    #votingCountdown { background: #eaf3ff; text-align: center; font-weight: bold; padding: 0.5rem; color: #00796B; display: none; }
+    #chat { flex: 1; overflow-y: auto; padding: 1rem 1.5rem; background: #fff; border-bottom: 1px solid #ddd; }
+    .msg { margin-bottom: 1rem; padding: 0.75rem 1rem; background: #eef1f5; border-radius: 8px; animation: fadeIn 0.3s ease-in-out; max-width: 100%; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; }
+    .msg strong { color: #2c3e50; }
+    .msg span { display: block; margin-top: 4px; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* Kotak Input dan Tombol Kirim */
+    #controls { display: flex; gap: 0.5rem; padding: 1rem 1.5rem; background: transparent; border-top: none; align-items: flex-end; }
+    #inputChat { flex: 1; padding: 0.6rem 1rem; border: 1px solid #ccc; border-radius: 20px; font-size: 1rem; resize: none; min-height: 40px; max-height: 200px; overflow-y: auto; line-height: 1.4; font-family: 'Inter', sans-serif; }
+    #kirim { width: 40px; height: 40px; border: none; border-radius: 50%; background: #00BCD4; color: white; cursor: pointer; transition: background 0.3s; display: flex; align-items: center; justify-content: center; }
+    #kirim:hover { background: #0097A7; }
+    #kirim .material-icons { font-size: 24px; }
+    
+    /* Formulir Voting */
+    #votingForm { display: none; padding: 1rem 1.5rem; background: #f9f9f9; border-top: 1px solid #ddd; position: absolute; bottom: 0; left: 0; width: 100%; z-index: 999; box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1); }
+    #votingForm h3 { margin-top: 0; margin-bottom: 1rem; color: #00796B; }
+    #votingForm input, #votingForm textarea { width: 100%; padding: 0.6rem; margin-bottom: 1rem; border-radius: 5px; border: 1px solid #ccc; font-family: 'Inter', sans-serif; }
+    #votingForm .action-buttons { text-align: right; }
+    #votingForm button { padding: 0.6rem 1.2rem; border-radius: 5px; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
+    #kirimVoting { background-color: #00BCD4; color: white; border: none; }
+    #kirimVoting:hover { background-color: #0097A7; }
+    #batalVoting { background-color: #9E9E9E; color: white; border: none; margin-left: 0.5rem; }
+    #batalVoting:hover { background-color: #757575; }
+
+    /* Notifikasi Permintaan Bicara */
+    #permintaanNotif { 
+      /* Perbaikan: Mengubah posisi dari bawah ke atas */
+      position: fixed; 
+      top: 72px; /* Nilai ini menempatkannya 20px di bawah header */
+      right: 20px; 
+      z-index: 1000;
+      background-color: transparent; color: cyan; padding: 12px 16px;
+      border-radius: 25px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      display: flex; align-items: center; gap: 10px; cursor: pointer;
+      transform: scale(0); transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    }
+    #permintaanNotif.show { transform: scale(1); }
+    #permintaanNotif .material-icons { font-size: 24px; }
+    #permintaanNotif span { font-weight: 600; font-size: 14px; }
+
+    /* Modal Permintaan Bicara */
+    #permintaanModal {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.5); z-index: 1003;
+      display: none; justify-content: center; align-items: center;
+    }
+    #permintaanModalContent {
+      background-color: white; padding: 2rem; border-radius: 10px;
+      width: 90%; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      position: relative; animation: slideIn 0.3s ease-out;
+    }
+    #permintaanModalContent h3 { margin-top: 0; color: #00796B; }
+    #permintaanModalContent .close-btn { 
+      position: absolute; top: 10px; right: 10px; font-size: 24px; 
+      cursor: pointer; color: #999; 
+    }
+    #permintaanList { list-style-type: none; padding: 0; margin-top: 1rem; }
+    #permintaanList li {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 0; border-bottom: 1px solid #eee;
+    }
+    #permintaanList li:last-child { border-bottom: none; }
+    #permintaanList .actions button { 
+      padding: 0.6rem 1rem; border-radius: 5px; font-weight: 600;
+      cursor: pointer; transition: background-color 0.2s; border: none;
+    }
+    #permintaanList .actions .izinkan { background-color: #2ecc71; color: white; }
+    #permintaanList .actions .tolak { background-color: #e74c3c; color: white; }
+
+    /* Sidebar Catatan */
+    #catatanSidebar {
+      position: fixed; top: 52px; right: -320px;
+      width: 300px; height: calc(100vh - 52px);
+      background-color: #fff; box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+      transition: right 0.3s ease-in-out;
+      display: flex; flex-direction: column;
+      z-index: 1000;
+    }
+    #catatanSidebar.show { right: 0; }
+    #catatanSidebar .sidebar-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem; border-bottom: 1px solid #eee;
+    }
+    #catatanSidebar .sidebar-header h3 { margin: 0; color: #00796B; }
+    #catatanSidebar .sidebar-header .close-btn {
+      background: none; border: none; font-size: 24px;
+      cursor: pointer; color: #999;
+    }
+    #catatanTextarea {
+      flex: 1; padding: 1rem; border: none;
+      resize: none; font-family: 'Inter', sans-serif;
+      font-size: 14px; line-height: 1.5;
+    }
+    #catatanTextarea:focus { outline: none; }
+
+    @keyframes slideIn {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @media (max-width: 600px) {
+      /* Perubahan utama di sini */
+      #controls { 
+        flex-direction: row; /* Mengubah dari kolom menjadi baris */
+        align-items: flex-end; /* Memastikan tombol Kirim tetap di bawah */
+      }
+      #votingForm, #permintaanModalContent { padding: 1rem; }
+      #permintaanNotif { bottom: 20px; right: 10px; }
+      #catatanSidebar { width: 100%; right: -100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="#" id="backBtn" class="back-btn"><i class="material-icons">arrow_back</i></a>
+  <h1 id="rapatJudul">Pimpinan Rapat</h1>
+  <button id="menuBtn" class="menu-button"><i class="material-icons">more_vert</i></button>
+  <ul id="dropdownMenu" class="dropdown-menu">
+    <li><a href="#" id="buatVotingBtn">🗳️ Buat Voting</a></li>
+    <li><a href="#" id="bukaCatatanBtn">📝 Catatan</a></li>
+  </ul>
+</header>
+
+<div id="votingCountdown"></div>
+<div id="chat"></div>
+
+<div id="permintaanNotif">
+  <i class="material-icons">record_voice_over</i>
+  <span id="jmlPermintaan">0</span> permintaan bicara
+</div>
+
+<div id="permintaanModal">
+  <div id="permintaanModalContent">
+    <i class="material-icons close-btn" id="closePermintaanModal">close</i>
+    <h3>Permintaan Bicara</h3>
+    <ul id="permintaanList">
+      </ul>
+  </div>
+</div>
+
+<div id="controls">
+  <textarea id="inputChat" placeholder="Ketik pesan..."></textarea>
+  <button id="kirim"><i class="material-icons">send</i></button>
+</div>
+<div id="votingForm">
+  <h3>Buat Voting</h3>
+  <input type="text" id="judulVoting" placeholder="Judul voting">
+  <textarea id="opsiVoting" placeholder="Tulis opsi, satu per baris..." rows="4"></textarea>
+  <div class="action-buttons">
+    <button id="kirimVoting">Mulai Voting (10 detik)</button>
+    <button id="batalVoting">Batal</button>
+  </div>
+</div>
+
+<div id="catatanSidebar">
+  <div class="sidebar-header">
+    <h3>Catatan Rapat</h3>
+    <button id="tutupCatatanBtn" class="close-btn">&times;</button>
+  </div>
+  <textarea id="catatanTextarea" placeholder="Tulis catatan di sini..."></textarea>
+</div>
+
+<audio id="audio" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onChildAdded, onValue, set, get, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  const firebaseConfig = {
+    apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
+    authDomain: "pustakawan-26664.firebaseapp.com",
+    databaseURL: "https://pustakawan-26664-default-rtdb.firebaseio.com",
+    projectId: "pustakawan-26664",
+    storageBucket: "pustakawan-26664.appspot.com",
+    messagingSenderId: "284579513964",
+    appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get('id');
+  const rapatId = urlParams.get('rapat');
+
+  const backBtn = document.getElementById('backBtn');
+  const chatBox = document.getElementById('chat');
+  const inputChat = document.getElementById('inputChat');
+  const kirimBtn = document.getElementById('kirim');
+  const votingForm = document.getElementById('votingForm');
+  const kirimVoting = document.getElementById('kirimVoting');
+  const batalVoting = document.getElementById('batalVoting');
+  const votingCountdown = document.getElementById('votingCountdown');
+  const audio = document.getElementById('audio');
+  const rapatJudulEl = document.getElementById('rapatJudul');
+  
+  const menuBtn = document.getElementById('menuBtn');
+  const dropdownMenu = document.getElementById('dropdownMenu');
+  const buatVotingBtn = document.getElementById('buatVotingBtn');
+
+  // Elemen baru untuk notifikasi dan modal
+  const permintaanNotif = document.getElementById('permintaanNotif');
+  const jmlPermintaan = document.getElementById('jmlPermintaan');
+  const permintaanModal = document.getElementById('permintaanModal');
+  const closePermintaanModal = document.getElementById('closePermintaanModal');
+  const permintaanList = document.getElementById('permintaanList');
+
+  // Elemen baru untuk sidebar catatan
+  const bukaCatatanBtn = document.getElementById('bukaCatatanBtn');
+  const catatanSidebar = document.getElementById('catatanSidebar');
+  const tutupCatatanBtn = document.getElementById('tutupCatatanBtn');
+  const catatanTextarea = document.getElementById('catatanTextarea');
+
+  let namaPengguna = id;
+  let permintaanTersimpan = {};
+  let debounceTimeout;
+
+  function debounce(func, delay) {
+    return function(...args) {
+      clearTimeout(debounceTimeout);
+      debounceTimeout = setTimeout(() => func.apply(this, args), delay);
+    };
+  }
+
+  async function init() {
+    if (!id || !rapatId) {
+        document.body.innerHTML = "<h1>Akses ditolak. Mohon login dan pilih rapat.</h1>";
+        return;
+    }
+    
+    backBtn.href = `rapat.html?id=${id}`;
+    const [namaSnap, rapatSnap] = await Promise.all([
+      get(ref(db, `pustakawan/${id}/nama`)),
+      get(ref(db, `rapat/${rapatId}/judul`))
+    ]);
+    if (namaSnap.exists()) namaPengguna = namaSnap.val();
+    if (rapatSnap.exists()) rapatJudulEl.textContent = `${rapatSnap.val()} (Pemimpin)`;
+
+    onChildAdded(ref(db, `rapat/${rapatId}/chat`), snap => {
+      const { nama, isi } = snap.val();
+      tampilkanChat(nama, isi);
+    });
+
+    onValue(ref(db, `rapat/${rapatId}/permintaan`), snap => {
+      const data = snap.val();
+      const keys = Object.keys(data || {});
+      jmlPermintaan.textContent = keys.length;
+      
+      if (keys.length > 0) {
+        permintaanNotif.classList.add('show');
+        audio.play();
+        navigator.vibrate?.(200);
+      } else {
+        permintaanNotif.classList.remove('show');
+        permintaanModal.style.display = 'none';
+      }
+
+      permintaanList.innerHTML = '';
+      keys.forEach(k => {
+        const orang = data[k];
+        if (!permintaanTersimpan[k]) {
+          set(ref(db, `rapat/${rapatId}/chat/${Date.now()}`), {
+            nama: '',
+            isi: `<b>${orang.nama}</b> meminta izin untuk berbicara.`
+          });
+        }
+        permintaanTersimpan[k] = orang;
+        
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span>${orang.nama}</span>
+          <div class="actions">
+            <button class="izinkan" data-id="${k}" data-nama="${orang.nama}">Izinkan</button>
+            <button class="tolak" data-id="${k}" data-nama="${orang.nama}">Tolak</button>
+          </div>
+        `;
+        permintaanList.appendChild(li);
+      });
+
+      Object.keys(permintaanTersimpan).forEach(k => {
+        if (!data || !data[k]) {
+          delete permintaanTersimpan[k];
+        }
+      });
+    });
+
+    onValue(ref(db, `rapat/${rapatId}/catatan`), snap => {
+        if (snap.exists()) {
+            catatanTextarea.value = snap.val();
+        }
+    });
+
+    catatanTextarea.addEventListener('input', debounce(() => {
+        set(ref(db, `rapat/${rapatId}/catatan`), catatanTextarea.value);
+    }, 500));
+
+    kirimBtn.onclick = () => {
+      const teks = inputChat.value.trim();
+      if (!teks) return;
+      set(ref(db, `rapat/${rapatId}/chat/${Date.now()}`), {
+        nama: `${namaPengguna} Pemimpin Rapat`,
+        isi: teks
+      });
+      inputChat.value = '';
+      inputChat.style.height = '40px';
+    };
+
+    inputChat.addEventListener('input', () => {
+      inputChat.style.height = 'auto';
+      inputChat.style.height = inputChat.scrollHeight + 'px';
+    });
+    
+    permintaanNotif.onclick = () => {
+      permintaanModal.style.display = 'flex';
+    };
+
+    closePermintaanModal.onclick = () => {
+      permintaanModal.style.display = 'none';
+    };
+    
+    permintaanList.addEventListener('click', (e) => {
+      const target = e.target;
+      if (target.tagName === 'BUTTON') {
+        const k = target.getAttribute('data-id');
+        const nama = target.getAttribute('data-nama');
+        
+        if (target.classList.contains('izinkan')) {
+          set(ref(db, `rapat/${rapatId}/respon/${k}`), 'izinkan');
+          remove(ref(db, `rapat/${rapatId}/permintaan/${k}`));
+          set(ref(db, `rapat/${rapatId}/chat/${Date.now()}`), { nama: '', isi: `Mengizinkan <b>${nama}</b> untuk bicara.` });
+        } else if (target.classList.contains('tolak')) {
+          set(ref(db, `rapat/${rapatId}/respon/${k}`), 'tolak');
+          remove(ref(db, `rapat/${rapatId}/permintaan/${k}`));
+          set(ref(db, `rapat/${rapatId}/chat/${Date.now()}`), { nama: '', isi: `Menolak permintaan bicara dari <b>${nama}</b>.` });
+        }
+      }
+    });
+
+    menuBtn.onclick = (e) => { e.stopPropagation(); dropdownMenu.classList.toggle('show'); };
+    document.onclick = (e) => { 
+        if (!dropdownMenu.contains(e.target) && !menuBtn.contains(e.target)) {
+            dropdownMenu.classList.remove('show');
+        }
+    };
+    
+    buatVotingBtn.onclick = () => { 
+        dropdownMenu.classList.remove('show'); 
+        votingForm.style.display = 'block'; 
+    };
+
+    bukaCatatanBtn.onclick = () => {
+        dropdownMenu.classList.remove('show');
+        catatanSidebar.classList.add('show');
+    };
+
+    tutupCatatanBtn.onclick = () => {
+        catatanSidebar.classList.remove('show');
+    };
+    
+    batalVoting.onclick = () => {
+      votingForm.style.display = 'none';
+    };
+    
+    kirimVoting.onclick = async () => {
+      const judul = document.getElementById('judulVoting').value.trim();
+      const opsi = document.getElementById('opsiVoting').value.trim().split('\n').filter(x => x);
+      if (!judul || opsi.length < 2) return;
+      const waktuMulai = Date.now();
+
+      await set(ref(db, `rapat/${rapatId}/voting`), { judul, opsi, waktuMulai });
+      await set(ref(db, `rapat/${rapatId}/chat/${Date.now()}`), { nama: '🗳️', isi: `Voting dimulai: "<b>${judul}</b>"` });
+
+      votingForm.style.display = 'none'; audio.play(); navigator.vibrate?.(300);
+      votingCountdown.style.display = 'block';
+      let sisa = 10;
+      const interval = setInterval(() => {
+        votingCountdown.textContent = `⏳ Sisa waktu voting: ${sisa} detik`;
+        sisa--;
+        if (sisa < 0) { clearInterval(interval); votingCountdown.style.display = 'none'; }
+      }, 1000);
+
+      setTimeout(async () => {
+        const snap = await get(ref(db, `rapat/${rapatId}/jawabanVoting`));
+        const hasil = {};
+        snap.forEach(s => { const val = s.val(); hasil[val] = (hasil[val] || 0) + 1; });
+
+        let teks = '<b>Hasil Voting</b><br><br>';
+        opsi.forEach(o => { const jumlah = hasil[o] || 0; teks += `${o}: ${jumlah} suara<br>`; });
+
+        await set(ref(db, `rapat/${rapatId}/chat/${Date.now()}`), { nama: '📊', isi: teks.trim() });
+        remove(ref(db, `rapat/${rapatId}/voting`));
+        remove(ref(db, `rapat/${rapatId}/jawabanVoting`));
+      }, 10000);
+    };
+  }
+
+  function tampilkanChat(nama, isi) {
+    const el = document.createElement('div');
+    el.className = 'msg';
+    const isiEl = document.createElement('span'); isiEl.innerHTML = isi;
+    if (nama) { const namaEl = document.createElement('strong'); namaEl.textContent = nama; el.appendChild(namaEl); }
+    el.appendChild(isiEl); chatBox.appendChild(el); chatBox.scrollTop = chatBox.scrollHeight;
+  }
+  init();
+</script>
+</body>
+</html>
