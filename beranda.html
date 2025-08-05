@@ -1,400 +1,453 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Beranda</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      background: #121212;
-      color: white;
-      display: flex;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Beranda Pustakawan</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        /* Gaya Dasar */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-    header {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      height: 64px;
-      background: #1e1e1e;
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-      border-bottom: 1px solid #333;
-      z-index: 1001;
-    }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background: #f0f2f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            /* Perubahan di sini: kurangi padding-top */
+            padding-top: 52px;
+            padding-bottom: 72px; 
+        }
 
-    header img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      margin-right: 12px;
-      cursor: pointer;
-    }
+        /* Header yang Tetap di Atas */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            width: 100%;
+            height: auto;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            /* Perubahan di sini: kurangi padding */
+            padding: 8px 24px;
+            border-bottom: 1px solid #ddd;
+        }
 
-    header h1 {
-      font-size: 18px;
-      margin: 0;
-    }
+        header h1 {
+            /* Perubahan di sini: kurangi ukuran font */
+            font-size: 18px;
+            margin: 0;
+            color: #00ACC1;
+        }
+        
+        header small {
+            /* Perubahan di sini: kurangi ukuran font */
+            font-size: 12px;
+            color: #777;
+            margin-top: 2px;
+        }
 
-    header small {
-      font-size: 12px;
-      color: #ccc;
-    }
+        /* Konten Utama */
+        main {
+            flex: 1;
+            padding: 0;
+            width: 100%;
+        }
+        
+        /* Daftar kontak (tanpa card) */
+        #daftarKontak {
+            background: transparent;
+            box-shadow: none;
+            overflow: hidden;
+        }
+        
+        /* Gaya Item Kontak */
+        .kontak-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            border-bottom: 1px solid #eee;
+            background: #ffffff;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            color: #333;
+        }
 
-    header button {
-      margin-left: auto;
-      background: #2c2c2c;
-      border: none;
-      color: white;
-      font-size: 20px;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      cursor: pointer;
-    }
+        .kontak-item:last-child {
+            border-bottom: none;
+        }
+        
+        .kontak-item:hover {
+            background: #f5f5f5;
+        }
 
-    aside {
-      position: fixed;
-      top: 64px;
-      left: 0;
-      width: 240px;
-      height: calc(100vh - 64px);
-      background: #1f1f1f;
-      padding: 24px 16px;
-      overflow-y: auto;
-      z-index: 1002;
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
-    }
+        .kontak-item .info {
+            flex-grow: 1;
+            margin-right: 12px;
+        }
 
-    aside.show {
-      transform: translateX(0);
-    }
+        .kontak-item .info b {
+            display: block;
+            font-size: 16px;
+            color: #00ACC1;
+        }
 
-    @media (min-width: 768px) {
-      aside {
-        transform: none !important;
-      }
-    }
+        .kontak-item .info small {
+            display: block;
+            color: #888;
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .badge {
+            background: #00ACC1;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 50px;
+        }
+        
+        /* Navigasi Bawah yang Tetap */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 60px;
+            background: #ffffff;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            height: 100%;
+            text-decoration: none;
+            color: #888;
+            transition: color 0.2s;
+        }
 
-    aside h2 {
-      font-size: 18px;
-      margin-top: 0;
-      margin-bottom: 24px;
-    }
+        .bottom-nav .nav-item.active {
+            color: #00ACC1;
+        }
 
-       aside a {
-       display: block;
-  color: #ccc;
-  text-decoration: none;
-  padding: 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  margin-bottom: 8px;
-  background: #2a2a2a;
-  transition: background 0.2s;
-}
-}
+        .bottom-nav .nav-item:hover {
+            color: #00ACC1;
+        }
 
-    aside a:hover {
-      background: #2a2a2a;
-      color: white;
-    }
-
-    main {
-      flex: 1;
-      padding: 88px 24px 24px;
-      width: 100%;
-    }
-
-    @media (min-width: 768px) {
-      main {
-        margin-left: 240px;
-      }
-    }
-
-    section {
-      margin-bottom: 32px;
-      background: #1e1e1e;
-      padding: 16px;
-      border-radius: 8px;
-      border-left: 4px solid #3f51b5;
-    }
-
-    section h2 {
-      margin-top: 0;
-      font-size: 18px;
-      margin-bottom: 12px;
-    }
-
-    .form-area {
-      margin-top: 12px;
-      display: none;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    textarea {
-      background: #2a2a2a;
-      color: #eee;
-      border: 1px solid #444;
-      border-radius: 6px;
-      padding: 10px;
-      resize: vertical;
-    }
-
-    .form-area button {
-      align-self: flex-end;
-      padding: 8px;
-      width: 36px;
-      height: 36px;
-      border: none;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.08);
-      color: white;
-      font-size: 18px;
-      cursor: pointer;
-    }
-
-    .form-area button:hover {
-      background: rgba(255,255,255,0.15);
-    }
-
-    .item {
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #333;
-    }
-
-    .item small {
-      color: #aaa;
-      font-size: 13px;
-      display: block;
-      margin-top: 4px;
-    }
-
-    #tamuPesan {
-      background: #222;
-      color: #fdd835;
-      padding: 12px;
-      border-radius: 6px;
-      margin-bottom: 24px;
-      font-size: 14px;
-    }
-
-    #overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.5);
-      z-index: 1000;
-    }
-
-    #overlay.show {
-      display: block;
-    }
-
-    @media (min-width: 768px) {
-      #overlay {
-        display: none !important;
-      }
-    }
-  </style>
+        .bottom-nav .nav-item .material-icons {
+            font-size: 24px;
+            margin-bottom: 2px;
+        }
+        
+        .bottom-nav .nav-item span {
+            font-size: 10px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
+    <header>
+        <h1 id="fnamaHeader">Beranda</h1>
+        <small id="fjabatanHeader"></small>
+    </header>
 
-  <div id="overlay" onclick="tutupSidebar()"></div>
+    <main>
+        <div id="daftarKontak" class="list-container">
+            </div>
+    </main>
 
-  <header>
-    <img id="foto" src="1.png" alt="Foto" onclick="toggleSidebar()" />
-    <div style="flex-grow: 1;">
-      <h1 id="fnamaHeader">Beranda</h1>
-      <small id="fjabatanHeader"></small>
-    </div>
-    <button id="toggleInput" title="Tambah">+</button>
-  </header>
+    <nav class="bottom-nav">
+        <a href="beranda.html?id=" id="linkBeranda" class="nav-item active">
+            <i class="material-icons">home</i>
+            <span>Beranda</span>
+        </a>
+        <a href="catatan.html?id=" id="linkCatatan" class="nav-item">
+            <i class="material-icons">note</i>
+            <span>Catatan</span>
+        </a>
+        <a href="rapat.html?id=" id="linkRapat" class="nav-item">
+            <i class="material-icons">event</i>
+            <span>Rapat</span>
+        </a>
+        <a href="profil.html?id=" id="linkProfil" class="nav-item">
+            <i class="material-icons">person</i>
+            <span>Profil</span>
+        </a>
+    </nav>
 
-  <aside id="sidebar">
-    <h2>📚 Menu</h2>
-    <a href="profil.html?id=" id="linkProfil">👤 Profil</a>
-    <a href="beranda.html?id=" id="linkBeranda">🏠 Beranda</a>
-    <a href="penugasan.html?id=" id="linkPenugasan">📄 Penugasan</a>
-    <a href="catatan.html?id=" id="linkCatatan">📔 Catatan</a>
-    <a href="chat.html?id=" id="linkChat">💬 Chat</a>
-    <a href="chat-umum.html?id=" id="linkChatUmum">💬 Chat Umum</a>
-    <a href="rapat.html?id=" id="linkRapat">📅 Rapat</a>
-    <a href="daftarpustakawan.html?id=" id="linkDaftarPustakawan">👤 Daftar Pustakawan</a>
-  </aside>
+    <script type="module">
+        import {
+            initializeApp
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 
-  <main>
-    <div id="tamuPesan" style="display:none;">
-      Anda sedang mengakses sebagai tamu. Anda hanya bisa melihat unggahan.
-    </div>
+        import {
+            getDatabase,
+            ref,
+            get,
+            onValue,
+            update,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    <section>
-      <h2>📢 Pengumuman Hari Ini</h2>
-      <div id="list-pengumuman">Memuat...</div>
-      <div class="form-area" id="form-pengumuman">
-        <textarea id="inputPengumuman" rows="2" placeholder="Tulis pengumuman..."></textarea>
-        <button onclick="unggahKonten('pengumuman')" title="Unggah">+</button>
-      </div>
-    </section>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
+            authDomain: "pustakawan-26664.firebaseapp.com",
+            projectId: "pustakawan-26664",
+            storageBucket: "pustakawan-26664.appspot.com",
+            messagingSenderId: "284579513964",
+            appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
+        };
 
-    <section>
-      <h2>💡 Kata-Kata Hari Ini</h2>
-      <div id="list-kata">Memuat...</div>
-      <div class="form-area" id="form-kata">
-        <textarea id="inputKata" rows="2" placeholder="Tulis kata hari ini..."></textarea>
-        <button onclick="unggahKonten('kata')" title="Unggah">+</button>
-      </div>
-    </section>
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-    <section>
-      <h2>🔥 Motivasi Hari Ini</h2>
-      <div id="list-motivasi">Memuat...</div>
-      <div class="form-area" id="form-motivasi">
-        <textarea id="inputMotivasi" rows="2" placeholder="Tulis motivasi..."></textarea>
-        <button onclick="unggahKonten('motivasi')" title="Unggah">+</button>
-      </div>
-    </section>
-  </main>
+        const urlParams = new URLSearchParams(location.search);
+        const id = urlParams.get("id");
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import {
-      getDatabase, ref, get, push, set, query, orderByChild, limitToLast, remove
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
-      authDomain: "pustakawan-26664.firebaseapp.com",
-      projectId: "pustakawan-26664",
-      storageBucket: "pustakawan-26664.appspot.com",
-      messagingSenderId: "284579513964",
-      appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const urlParams = new URLSearchParams(location.search);
-    const id = urlParams.get("id");
-
-    const namaHeader = document.getElementById("fnamaHeader");
-    const jabatanHeader = document.getElementById("fjabatanHeader");
-    
-
-    const linkIDs = [
-      "linkProfil",
-      "linkBeranda",
-      "linkPenugasan",
-      "linkCatatan",
-      "linkChat",
-      "linkChatUmum",
-      "linkRapat",
-      "linkDaftarPustakawan"
-    ];
-    linkIDs.forEach(lid => {
-      const el = document.getElementById(lid);
-      if (el && id) el.href += id;
-    });
-
-    let namaPengguna = "(Tanpa Nama)";
-
-    async function muatProfil() {
-      if (!id) return;
-      const snap = await get(ref(db, `pustakawan/${id}`));
-      if (snap.exists()) {
-        const data = snap.val();
-        namaHeader.textContent = data.nama || "";
-        jabatanHeader.textContent = data.jabatan || "";
-        namaPengguna = data.nama || "(Tanpa Nama)";
-      }
-    }
-
-    function tampilList(refNama) {
-      const q = query(ref(db, `konten/${refNama}`), orderByChild("waktu"), limitToLast(7));
-      get(q).then(snap => {
-        const list = document.getElementById("list-" + refNama);
-        list.innerHTML = "";
-        if (snap.exists()) {
-          const arr = Object.entries(snap.val()).sort((a, b) => b[1].waktu - a[1].waktu);
-          arr.forEach(([key, val]) => {
-            const div = document.createElement("div");
-            div.className = "item";
-            div.innerHTML = `<p>${val.teks}</p><small>oleh ${val.oleh}</small>`;
-            list.appendChild(div);
-          });
-        } else {
-          list.innerHTML = "<p>Belum ada unggahan.</p>";
+        if (!id) {
+            document.body.innerHTML = "<main style='padding:24px; text-align:center;'>Akses ditolak. Mohon login.</main>";
+            throw new Error("Akses ditolak");
         }
-      });
-    }
+        
+        const namaHeader = document.getElementById("fnamaHeader");
+        const jabatanHeader = document.getElementById("fjabatanHeader");
+        const daftarKontak = document.getElementById("daftarKontak");
+        
+        const linkIDs = ["linkBeranda", "linkCatatan", "linkRapat", "linkProfil"];
+        
+        linkIDs.forEach(linkId => {
+            const el = document.getElementById(linkId);
+            if (el && id) {
+                const url = new URL(el.getAttribute("href"), location.href);
+                url.searchParams.set("id", id);
+                el.setAttribute("href", url.toString());
+            }
+        });
 
-    async function unggahKonten(jenis) {
-      const textarea = document.getElementById("input" + jenis.charAt(0).toUpperCase() + jenis.slice(1));
-      const teks = textarea.value.trim();
-      if (!teks) return alert("Teks kosong.");
-
-      const kontenRef = ref(db, `konten/${jenis}`);
-      const newRef = push(kontenRef);
-      await set(newRef, {
-        teks, oleh: namaPengguna, waktu: Date.now()
-      });
-
-      textarea.value = "";
-      tampilList(jenis);
-
-      const snap = await get(kontenRef);
-      if (snap.exists()) {
-        const data = Object.entries(snap.val());
-        if (data.length > 7) {
-          const sorted = data.sort((a, b) => a[1].waktu - b[1].waktu);
-          for (let i = 0; i < data.length - 7; i++) {
-            await remove(ref(db, `konten/${jenis}/${sorted[i][0]}`));
-          }
+        async function tandaiSudahDibaca(chatRef, userId) {
+            const snapshot = await get(chatRef);
+            if (snapshot.exists()) {
+                const updates = {};
+                let hasUnread = false;
+                snapshot.forEach(child => {
+                    const data = child.val();
+                    if (data.dari !== userId && !data.dibaca) {
+                        updates[`${child.key}/dibaca`] = true;
+                        hasUnread = true;
+                    }
+                });
+                if (hasUnread) {
+                    await update(chatRef, updates);
+                }
+            }
         }
-      }
-    }
+        
+        async function init() {
+            if (id) {
+                const snap = await get(ref(db, `pustakawan/${id}`));
+                if (snap.exists()) {
+                    const data = snap.val();
+                    namaHeader.textContent = data.nama || "Pengguna";
+                    jabatanHeader.textContent = data.jabatan || "";
+                }
+            }
+            tampilkanKontak();
+        }
 
-    document.getElementById("toggleInput").onclick = () => {
-      const show = document.getElementById("form-pengumuman").style.display === "none";
-      ["form-pengumuman", "form-kata", "form-motivasi"].forEach(id => {
-        const ele = document.getElementById(id);
-        if (ele) ele.style.display = show ? "flex" : "none";
-      });
-      document.getElementById("toggleInput").textContent = show ? "×" : "+";
-    };
+        async function tampilkanKontak() {
+            const userListSnap = await get(ref(db, "pustakawan"));
+            if (!userListSnap.exists()) return;
 
-    window.unggahKonten = unggahKonten;
+            daftarKontak.innerHTML = '';
 
-    const isPustakawan = !!id;
-    if (!isPustakawan) {
-      document.getElementById("toggleInput").style.display = "none";
-      document.getElementById("tamuPesan").style.display = "block";
-    }
+            // Membuat dan menambahkan kontainer untuk Obrolan
+            const obrolanContainer = document.createElement("div");
+            obrolanContainer.className = "obrolan-container";
+            const obrolanLink = document.createElement("a");
+            obrolanLink.href = `chat-umum.html?id=${id}`;
+            obrolanLink.className = "kontak-item";
+            obrolanLink.style.paddingLeft = "24px";
+            obrolanLink.innerHTML = `
+                <div class="info">
+                    <b>Obrolan</b>
+                    <small id="cuplikan-umum">Ruang obrolan untuk semua pustakawan.</small>
+                </div>
+                <span class="badge" id="badge-umum" style="display:none">0</span>
+            `;
+            obrolanContainer.appendChild(obrolanLink);
+            daftarKontak.appendChild(obrolanContainer);
+            
+            const obrolanUmumRef = ref(db, 'chatumum');
+            obrolanLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                tandaiSudahDibaca(obrolanUmumRef, id).then(() => {
+                    window.location.href = obrolanLink.href;
+                });
+            });
+            
+            // Kontainer terpisah untuk kontak pribadi
+            const daftarPribadi = document.createElement("div");
+            daftarPribadi.id = "daftarPribadi";
+            daftarKontak.appendChild(daftarPribadi);
 
-    muatProfil();
-    ["pengumuman", "kata", "motivasi"].forEach(tampilList);
+            const userList = userListSnap.val();
+            const kontakPribadiPromises = Object.entries(userList)
+                .filter(([uid, val]) => uid !== id)
+                .map(async ([uid, val]) => {
+                    const pasangan = [id, uid].sort().join("_");
+                    const kontakRef = ref(db, `chatpribadi/${pasangan}`);
+                    const chatSnapshot = await get(kontakRef);
 
-    // Sidebar Mobile Logic
-    window.toggleSidebar = () => {
-      const sidebar = document.getElementById("sidebar");
-      const overlay = document.getElementById("overlay");
-      const show = !sidebar.classList.contains("show");
-      sidebar.classList.toggle("show", show);
-      overlay.classList.toggle("show", show);
-    };
+                    let lastMsg = "Tidak ada pesan";
+                    let pesanBaru = 0;
+                    let lastMsgTimestamp = 0;
 
-    window.tutupSidebar = () => {
-      document.getElementById("sidebar").classList.remove("show");
-      document.getElementById("overlay").classList.remove("show");
-    };
-  </script>
+                    if (chatSnapshot.exists()) {
+                        chatSnapshot.forEach(child => {
+                            const data = child.val();
+                            if (data) {
+                                lastMsg = data.teks;
+                                lastMsgTimestamp = data.timestamp;
+                                if (data.dari === uid && data.ke === id && !data.dibaca) {
+                                    pesanBaru++;
+                                }
+                            }
+                        });
+                    }
+                    
+                    return {
+                        uid,
+                        val,
+                        lastMsg,
+                        pesanBaru,
+                        kontakRef,
+                        lastMsgTimestamp
+                    };
+                });
+            
+            const kontakPribadi = await Promise.all(kontakPribadiPromises);
+
+            // Mengurutkan kontak: yang memiliki pesan baru di atas, jika sama, urutkan berdasarkan timestamp
+            kontakPribadi.sort((a, b) => {
+                const unreadDiff = b.pesanBaru - a.pesanBaru;
+                if (unreadDiff !== 0) {
+                    return unreadDiff;
+                }
+                const timeDiff = b.lastMsgTimestamp - a.lastMsgTimestamp;
+                if (timeDiff !== 0) {
+                    return timeDiff;
+                }
+                return a.val.nama.localeCompare(b.val.nama);
+            });
+
+            // Membuat dan menambahkan elemen DOM untuk kontak pribadi
+            kontakPribadi.forEach(kontak => {
+                const { uid, val, lastMsg, pesanBaru, kontakRef } = kontak;
+                
+                const div = document.createElement("a");
+                div.href = `chat.html?id=${id}&tujuan=${uid}`;
+                div.className = "kontak-item";
+                div.id = `kontak-${uid}`;
+                div.style.paddingLeft = "24px";
+                div.innerHTML = `
+                    <div class="info">
+                        <b>${val.nama || uid}</b>
+                        <small id="cuplikan-${uid}">${lastMsg.length > 30 ? lastMsg.substring(0, 27) + "..." : lastMsg}</small>
+                    </div>
+                    <span class="badge" id="badge-${uid}" style="display: ${pesanBaru > 0 ? 'inline-block' : 'none'}">${pesanBaru}</span>
+                `;
+                daftarPribadi.appendChild(div);
+
+                // Event listener saat kontak pribadi diklik
+                div.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    tandaiSudahDibaca(kontakRef, id).then(() => {
+                        window.location.href = div.href;
+                    });
+                });
+
+                // Menjaga agar badge dan cuplikan pesan tetap update secara real-time
+                onValue(kontakRef, snap => {
+                    let newLastMsg = "";
+                    let newPesanBaru = 0;
+                    let lastTimestamp = 0;
+                    snap.forEach(child => {
+                        const data = child.val();
+                        if (data) {
+                            newLastMsg = data.teks;
+                            lastTimestamp = data.timestamp;
+                            if (data.dari === uid && data.ke === id && !data.dibaca) {
+                                newPesanBaru++;
+                            }
+                        }
+                    });
+                    document.getElementById(`cuplikan-${uid}`).textContent =
+                        newLastMsg.length > 30 ? newLastMsg.substring(0, 27) + "..." : newLastMsg || "Tidak ada pesan";
+                    
+                    const badge = document.getElementById(`badge-${uid}`);
+                    if (newPesanBaru > 0) {
+                        badge.style.display = "inline-block";
+                        badge.textContent = newPesanBaru;
+                        daftarPribadi.prepend(div);
+                    } else {
+                        badge.style.display = "none";
+                    }
+                });
+            });
+            
+            // Real-time listener for Obrolan Umum
+            onValue(obrolanUmumRef, snap => {
+                let lastMsg = "";
+                let pesanBaru = 0;
+                snap.forEach(child => {
+                    const data = child.val();
+                    if (data) {
+                        lastMsg = data.teks;
+                        if (data.dari !== id && !data.dibaca) {
+                            pesanBaru++;
+                        }
+                    }
+                });
+
+                document.getElementById(`cuplikan-umum`).textContent =
+                    lastMsg.length > 30 ? lastMsg.substring(0, 27) + "..." : lastMsg || "Ruang obrolan untuk semua pustakawan.";
+                
+                const badge = document.getElementById(`badge-umum`);
+                if (pesanBaru > 0) {
+                    badge.style.display = "inline-block";
+                    badge.textContent = pesanBaru;
+                } else {
+                    badge.style.display = "none";
+                }
+            });
+        }
+        
+        init();
+    </script>
 </body>
 </html>
