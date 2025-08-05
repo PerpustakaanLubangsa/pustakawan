@@ -1,134 +1,254 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Panel Admin</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #121212;
-      color: #f0f0f0;
-      margin: 0;
-      padding: 2rem;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    section {
-      margin-bottom: 2rem;
-    }
-    section h2 {
-      border-bottom: 2px solid #444;
-      padding-bottom: 0.5rem;
-    }
-    ul {
-      list-style: none;
-      padding-left: 0;
-    }
-    li {
-      background: #1e1e1e;
-      margin: 0.5rem 0;
-      padding: 0.75rem 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-radius: 5px;
-    }
-    .key {
-      word-break: break-all;
-    }
-    button {
-      background: #e74c3c;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #c0392b;
-    }
-    .msg {
-      font-style: italic;
-      color: #ccc;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halaman Admin</title>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 2rem; }
+        .container { max-width: 1000px; margin: auto; background-color: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1, h2 { color: #00BCD4; border-bottom: 2px solid #eee; padding-bottom: 1rem; }
+        
+        .form-section { margin-bottom: 2rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px;
+            font-size: 1rem; transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #00BCD4; }
+        
+        .btn {
+            padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer;
+            font-size: 1rem; font-weight: 600; transition: background-color 0.2s;
+        }
+        .btn-primary { background-color: #00BCD4; color: white; }
+        .btn-primary:hover { background-color: #0097A7; }
+        .btn-danger { background-color: #f44336; color: white; margin-left: 0.5rem; }
+        .btn-danger:hover { background-color: #d32f2f; }
+        .btn-secondary { background-color: #e0e0e0; color: #333; margin-left: 0.5rem; }
+        .btn-secondary:hover { background-color: #bdbdbd; }
+        
+        .data-list { list-style: none; padding: 0; }
+        .data-list li {
+            background-color: #f9f9f9; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .data-list li .info { flex-grow: 1; }
+        .data-list li .info p { margin: 0.25rem 0; }
+        .data-list li .actions { display: flex; gap: 0.5rem; }
+
+        @media (max-width: 600px) {
+            .container { padding: 1rem; }
+            .data-list li { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+        }
+    </style>
 </head>
 <body>
 
-<h1>🔐 Panel Admin</h1>
+<div class="container">
+    <h1>Halaman Admin</h1>
+    
+    <div class="form-section">
+        <h2>Kelola Pustakawan</h2>
+        <form id="formPustakawan">
+            <input type="hidden" id="pustakawanId">
+            <div class="form-group">
+                <label for="pustakawanNama">Nama Pustakawan</label>
+                <input type="text" id="pustakawanNama" required>
+            </div>
+            <div class="form-group">
+                <label for="pustakawanPassword">Password</label>
+                <input type="password" id="pustakawanPassword" required>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btnPustakawanSubmit">Tambah Pustakawan</button>
+            <button type="button" class="btn btn-secondary" id="btnPustakawanCancel" style="display:none;">Batal</button>
+        </form>
+        <ul id="listPustakawan" class="data-list"></ul>
+    </div>
 
-<section id="pustakawanSec"><h2>👤 Pustakawan</h2><ul id="pustakawan"></ul></section>
-<section id="penugasanSec"><h2>📄 Penugasan</h2><ul id="penugasan"></ul></section>
-<section id="catatanSec"><h2>📔 Catatan</h2><ul id="catatan"></ul></section>
-<section id="chatumumSec"><h2>💬 Chat Umum</h2><ul id="chatumum"></ul></section>
-<section id="rapatSec"><h2>📅 Rapat</h2><ul id="rapat"></ul></section>
+    <hr>
+
+    <div class="form-section">
+        <h2>Kelola Rapat</h2>
+        <form id="formRapat">
+            <input type="hidden" id="rapatId">
+            <div class="form-group">
+                <label for="rapatJudul">Judul Rapat</label>
+                <input type="text" id="rapatJudul" required>
+            </div>
+            <div class="form-group">
+                <label for="rapatSandi">Sandi Rapat</label>
+                <input type="password" id="rapatSandi" required>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btnRapatSubmit">Tambah Rapat</button>
+            <button type="button" class="btn btn-secondary" id="btnRapatCancel" style="display:none;">Batal</button>
+        </form>
+        <ul id="listRapat" class="data-list"></ul>
+    </div>
+</div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import {
-    getDatabase, ref, onValue, remove
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set, remove, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
-    authDomain: "pustakawan-26664.firebaseapp.com",
-    databaseURL: "https://pustakawan-26664-default-rtdb.firebaseio.com",
-    projectId: "pustakawan-26664",
-    storageBucket: "pustakawan-26664.appspot.com",
-    messagingSenderId: "284579513964",
-    appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
-  };
+    const firebaseConfig = {
+        apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
+        authDomain: "pustakawan-26664.firebaseapp.com",
+        databaseURL: "https://pustakawan-26664-default-rtdb.firebaseio.com",
+        projectId: "pustakawan-26664",
+        storageBucket: "pustakawan-26664.appspot.com",
+        messagingSenderId: "284579513964",
+        appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-  const paths = ["pustakawan", "penugasan", "catatan", "chatumum", "rapat"];
+    // --- Elemen HTML ---
+    const formPustakawan = document.getElementById('formPustakawan');
+    const pustakawanId = document.getElementById('pustakawanId');
+    const pustakawanNama = document.getElementById('pustakawanNama');
+    const pustakawanPassword = document.getElementById('pustakawanPassword');
+    const btnPustakawanSubmit = document.getElementById('btnPustakawanSubmit');
+    const btnPustakawanCancel = document.getElementById('btnPustakawanCancel');
+    const listPustakawan = document.getElementById('listPustakawan');
 
-  paths.forEach(path => {
-    const ul = document.getElementById(path);
-    onValue(ref(db, path), snap => {
-      ul.innerHTML = "";
-      const data = snap.val();
-      if (!data) {
-        ul.innerHTML = "<li class='msg'>Tidak ada data</li>";
-        return;
-      }
+    const formRapat = document.getElementById('formRapat');
+    const rapatId = document.getElementById('rapatId');
+    const rapatJudul = document.getElementById('rapatJudul');
+    const rapatSandi = document.getElementById('rapatSandi'); // Elemen baru
+    const btnRapatSubmit = document.getElementById('btnRapatSubmit');
+    const btnRapatCancel = document.getElementById('btnRapatCancel');
+    const listRapat = document.getElementById('listRapat');
 
-      Object.entries(data).forEach(([key, val]) => {
-        let label = key;
-
-        if (path === "pustakawan") {
-          const nama = val.nama || "Tanpa Nama";
-          label = `${nama} (${key})`;
-        } else if (path === "penugasan") {
-          label = `${val.oleh} ➜ ${val.untuk}`;
-        } else if (path === "rapat") {
-          label = val.judul ? `${val.judul} (${key})` : key;
-        } else if (path === "chatumum") {
-          label = `${val.nama}: ${val.teks}`;
-        } else if (path === "catatan") {
-          label = val.judul || key;
-        }
-
-        const li = document.createElement("li");
-        li.innerHTML = `
-          <span class="key">${label}</span>
-          <button onclick="hapusItem('${path}', '${key}')">🗑️ Hapus</button>
-        `;
-        ul.appendChild(li);
-      });
+    // --- Fungsi CRUD Pustakawan ---
+    onValue(ref(db, 'pustakawan'), (snapshot) => {
+        listPustakawan.innerHTML = '';
+        snapshot.forEach(childSnapshot => {
+            const data = childSnapshot.val();
+            const id = childSnapshot.key;
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <div class="info">
+                    <p><strong>ID:</strong> ${id}</p>
+                    <p><strong>Nama:</strong> ${data.nama}</p>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="editPustakawan('${id}', '${data.nama}', '${data.password}')">Edit</button>
+                    <button class="btn btn-danger" onclick="hapusPustakawan('${id}')">Hapus</button>
+                </div>
+            `;
+            listPustakawan.appendChild(li);
+        });
     });
-  });
 
-  window.hapusItem = function(path, key) {
-    if (confirm(`Yakin ingin menghapus entri dari "${path}"?\nID: ${key}`)) {
-      remove(ref(db, `${path}/${key}`));
-    }
-  };
+    formPustakawan.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = pustakawanId.value || 'pustakawan' + Date.now();
+        const nama = pustakawanNama.value;
+        const password = pustakawanPassword.value;
+        set(ref(db, `pustakawan/${id}`), { nama, password })
+            .then(() => {
+                alert('Data pustakawan berhasil disimpan!');
+                formPustakawan.reset();
+                pustakawanId.value = '';
+                btnPustakawanSubmit.textContent = 'Tambah Pustakawan';
+                btnPustakawanCancel.style.display = 'none';
+            })
+            .catch((error) => {
+                alert('Gagal menyimpan data: ' + error.message);
+            });
+    });
+
+    window.editPustakawan = (id, nama, password) => {
+        pustakawanId.value = id;
+        pustakawanNama.value = nama;
+        pustakawanPassword.value = password;
+        btnPustakawanSubmit.textContent = 'Update Pustakawan';
+        btnPustakawanCancel.style.display = 'inline-block';
+    };
+
+    btnPustakawanCancel.addEventListener('click', () => {
+        formPustakawan.reset();
+        pustakawanId.value = '';
+        btnPustakawanSubmit.textContent = 'Tambah Pustakawan';
+        btnPustakawanCancel.style.display = 'none';
+    });
+
+    window.hapusPustakawan = (id) => {
+        if (confirm('Apakah Anda yakin ingin menghapus pustakawan ini?')) {
+            remove(ref(db, `pustakawan/${id}`))
+                .then(() => alert('Pustakawan berhasil dihapus!'))
+                .catch((error) => alert('Gagal menghapus: ' + error.message));
+        }
+    };
+
+    // --- Fungsi CRUD Rapat ---
+    onValue(ref(db, 'rapat'), (snapshot) => {
+        listRapat.innerHTML = '';
+        snapshot.forEach(childSnapshot => {
+            const data = childSnapshot.val();
+            const id = childSnapshot.key;
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <div class="info">
+                    <p><strong>ID:</strong> ${id}</p>
+                    <p><strong>Judul:</strong> ${data.judul}</p>
+                    <p><strong>Sandi:</strong> ${data.sandi}</p>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="editRapat('${id}', '${data.judul}', '${data.sandi}')">Edit</button>
+                    <button class="btn btn-danger" onclick="hapusRapat('${id}')">Hapus</button>
+                </div>
+            `;
+            listRapat.appendChild(li);
+        });
+    });
+
+    formRapat.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = rapatId.value || `rapat-${Date.now()}`;
+        const judul = rapatJudul.value;
+        const sandi = rapatSandi.value;
+        set(ref(db, `rapat/${id}`), { judul, sandi })
+            .then(() => {
+                alert('Data rapat berhasil disimpan!');
+                formRapat.reset();
+                rapatId.value = '';
+                btnRapatSubmit.textContent = 'Tambah Rapat';
+                btnRapatCancel.style.display = 'none';
+            })
+            .catch((error) => {
+                alert('Gagal menyimpan data: ' + error.message);
+            });
+    });
+
+    window.editRapat = (id, judul, sandi) => {
+        rapatId.value = id;
+        rapatJudul.value = judul;
+        rapatSandi.value = sandi;
+        btnRapatSubmit.textContent = 'Update Rapat';
+        btnRapatCancel.style.display = 'inline-block';
+    };
+
+    btnRapatCancel.addEventListener('click', () => {
+        formRapat.reset();
+        rapatId.value = '';
+        btnRapatSubmit.textContent = 'Tambah Rapat';
+        btnRapatCancel.style.display = 'none';
+    });
+
+    window.hapusRapat = (id) => {
+        if (confirm('Apakah Anda yakin ingin menghapus rapat ini?')) {
+            remove(ref(db, `rapat/${id}`))
+                .then(() => alert('Rapat berhasil dihapus!'))
+                .catch((error) => alert('Gagal menghapus: ' + error.message));
+        }
+    };
 </script>
 
 </body>
