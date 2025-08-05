@@ -1,86 +1,49 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mengarahkan ke Beranda</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halaman Loading</title>
+    <style>
+        /* CSS untuk layar loading (splash screen) */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
 
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #0e0e0e;
-      color: #e0f7ff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      overflow: hidden;
-    }
+        /* CSS untuk logo di tengah */
+        #splash-screen .logo {
+            max-width: 150px;
+            height: auto;
+        }
 
-    .loader {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: conic-gradient(from 0deg, rgb(0, 255, 255) 10%, transparent 10% 100%);
-      animation: spin 2s linear infinite;
-      position: relative;
-    }
-
-    .loader::before {
-      content: '';
-      position: absolute;
-      inset: 6px;
-      background-color: #0e0e0e;
-      border-radius: 50%;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    h1 {
-      font-weight: 300;
-      font-size: 16px;
-      text-align: center;
-      margin-top: 28px;
-      opacity: 0;
-      animation: fadeIn 1.2s ease-in-out 1s forwards;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 0.88;
-        transform: translateY(0);
-      }
-    }
-  </style>
+        /* Konten utama tidak diperlukan karena akan di-redirect */
+    </style>
 </head>
 <body>
-  <div class="loader"></div>
-  <h1>Mengarahkan Anda ke beranda...</h1>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get("id");
+<div id="splash-screen">
+    <img src="https://via.placeholder.com/150" alt="Logo Perusahaan" class="logo">
+</div>
 
-    setTimeout(() => {
-      if (id) {
-        window.location.href = `beranda.html?id=${encodeURIComponent(id)}`;
-      } else {
-        window.location.href = `beranda.html`;
-      }
-    }, 3000); // 3 detik untuk pengalaman transisi yang lebih lembut
-  </script>
+<script>
+    // JavaScript untuk mengatur waktu jeda dan pengalihan halaman
+    document.addEventListener('DOMContentLoaded', () => {
+        // Atur waktu jeda selama 2000 milidetik (2 detik)
+        setTimeout(() => {
+            // Setelah 2 detik, langsung alihkan pengguna ke beranda.html
+            window.location.href = "beranda.html"; 
+        }, 2000); // Waktu jeda 2 detik
+    });
+</script>
+
 </body>
 </html>
