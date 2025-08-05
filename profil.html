@@ -1,376 +1,563 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Profil Pustakawan</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      background: #121212;
-      color: white;
-      display: flex;
-      flex-direction: row;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Profil Pustakawan</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        /* Gaya Dasar */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-    header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 64px;
-      background: #1e1e1e;
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-      border-bottom: 1px solid #333;
-      z-index: 1001;
-    }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background: #f0f2f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding-top: 52px;
+            padding-bottom: 72px; 
+        }
 
-    header img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      margin-right: 12px;
-      cursor: pointer;
-    }
+        /* Header yang Tetap di Atas */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            width: 100%;
+            height: auto;
+            background: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 24px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        header .title-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+        }
 
-    header h1 {
-      font-size: 18px;
-      margin: 0;
-    }
+        header h1 {
+            font-size: 18px;
+            margin: 0;
+            color: #00ACC1;
+        }
+        
+        header small {
+            font-size: 12px;
+            color: #777;
+            margin-top: 2px;
+        }
+        
+        header button {
+            width: 48px;
+            height: 48px;
+            font-size: 24px;
+            border: none;
+            border-radius: 50%;
+            background: #00ACC1;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform 0.2s;
+        }
+        
+        header button:active {
+            transform: scale(0.9);
+        }
 
-    header small {
-      display: block;
-      font-size: 12px;
-      color: #ccc;
-    }
+        /* Konten Utama */
+        main {
+            flex: 1;
+            padding: 16px 24px;
+            width: 100%;
+        }
 
-    aside {
-      position: fixed;
-      top: 64px;
-      left: 0;
-      width: 240px;
-      height: calc(100vh - 64px);
-      background: #1f1f1f;
-      padding: 24px 16px;
-      overflow-y: auto;
-      z-index: 1002;
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
-    }
+        .profil-container {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .profil-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
 
-    aside.show {
-      transform: translateX(0);
-    }
+        .profil-header h2 {
+            font-size: 22px;
+            margin: 0;
+            color: #00ACC1;
+        }
 
-    @media (min-width: 768px) {
-      aside {
-        transform: none !important;
-      }
-    }
+        .profil-header .jabatan {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+            display: block;
+        }
 
-    aside h2 {
-      font-size: 18px;
-      margin-top: 0;
-      margin-bottom: 24px;
-    }
+        .info {
+            margin-bottom: 20px;
+        }
 
-    aside a {
-      display: block;
-      color: #ccc;
-      text-decoration: none;
-      padding: 12px;
-      border-radius: 6px;
-      font-size: 14px;
-      margin-bottom: 8px;
-      background: #2a2a2a;
-      transition: background 0.2s;
-    }
+        .info label {
+            display: block;
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 8px;
+        }
 
-    aside a:hover {
-      background: #2a2a2a;
-      color: white;
-    }
+        .info input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            background: #f8f8f8;
+            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 24px;
+            transition: border-color 0.2s;
+            outline: none;
+        }
 
-    main {
-      flex: 1;
-      padding: 88px 0 24px;
-      width: 100%;
-    }
+        .info input:read-only {
+            background: #ffffff;
+            border-color: transparent;
+        }
 
-    @media (min-width: 768px) {
-      main {
-        margin-left: 240px;
-      }
-    }
+        .info input:focus:not([readonly]) {
+            border-color: #00ACC1;
+        }
+        
+        .divider {
+            border: none;
+            height: 1px;
+            background-color: #eee;
+            margin: 32px 0;
+        }
 
-    #profilBox {
-      width: 100%;
-      padding: 0 24px;
-    }
+        .dynamic-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .dynamic-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: transparent;
+            border: none;
+            padding: 0;
+            position: relative;
+        }
+        
+        .dynamic-field .field-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .dynamic-field input {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            background: #ffffff;
+            font-size: 14px;
+        }
 
-    .info {
-      margin-bottom: 16px;
-    }
+        .dynamic-field .view-only {
+            padding: 0;
+        }
+        
+        .dynamic-field .delete-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
 
-    .info label {
-      display: block;
-      font-size: 14px;
-      margin-bottom: 4px;
-      text-align: left;
-    }
+        /* GAYA DROPDOWN URUTAN */
+        .dynamic-field .field-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dynamic-field select.field-order {
+            padding: 4px 8px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            background: #fff;
+            font-size: 12px;
+            color: #555;
+            cursor: pointer;
+        }
 
-    .info input {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      background: #2a2a2a;
-      color: #ccc;
-      border: 1px solid #444;
-      border-radius: 6px;
-    }
+        /* GAYA TOMBOL TAMBAH KETERANGAN BARU */
+        .add-btn-minimalist {
+            width: 100%;
+            padding: 12px;
+            margin-top: 24px;
+            background: #fff;
+            color: #00ACC1;
+            border: 1px dashed #00ACC1;
+            border-radius: 24px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
+            display: none; /* Sembunyikan secara default */
+        }
+        
+        .add-btn-minimalist:hover {
+            background: #e0f7fa;
+        }
 
-    input:read-only {
-      background: #2a2a2a;
-      color: #ccc;
-      border-color: #333;
-    }
+        #notif {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 14px;
+            color: #f44336;
+        }
+        
+        /* Navigasi Bawah yang Tetap */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 60px;
+            background: #ffffff;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            height: 100%;
+            text-decoration: none;
+            color: #888;
+            transition: color 0.2s;
+        }
 
-    #notif {
-      text-align: center;
-      margin-top: 16px;
-      font-size: 14px;
-      color: #fdd835;
-    }
+        .bottom-nav .nav-item.active {
+            color: #00ACC1;
+        }
 
-    #overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-    }
+        .bottom-nav .nav-item:hover {
+            color: #00ACC1;
+        }
 
-    #overlay.show {
-      display: block;
-    }
-
-    @media (min-width: 768px) {
-      #overlay {
-        display: none !important;
-      }
-    }
-
-    .tombol-aksi {
-      text-align: center;
-      margin-top: 24px;
-    }
-
-    .tombol-aksi button {
-      padding: 8px 16px;
-      font-size: 14px;
-      margin: 4px;
-      cursor: pointer;
-      background-color: #333;
-      color: #fff;
-      border: 1px solid #555;
-      border-radius: 4px;
-    }
-
-    .tombol-aksi button:hover {
-      background-color: #444;
-    }
-  </style>
+        .bottom-nav .nav-item .material-icons {
+            font-size: 24px;
+            margin-bottom: 2px;
+        }
+        
+        .bottom-nav .nav-item span {
+            font-size: 10px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
+    <header>
+        <div class="title-container">
+            <h1 id="fnamaHeader">Profil</h1>
+            <small id="fjabatanHeader"></small>
+        </div>
+        <button id="tombolAksi"><i class="material-icons">edit</i></button>
+    </header>
 
-  <div id="overlay" onclick="tutupSidebar()"></div>
+    <main>
+        <div class="profil-container">
+            <div class="profil-header">
+                <h2 id="fnamaDisplay">Nama Pengguna</h2>
+                <span id="fjabatanDisplay" class="jabatan">Jabatan</span>
+            </div>
+            
+            <div class="info-group">
+                <div class="info"><label>ID</label><input id="fid" readonly /></div>
+                <div class="info"><label>Anggota Sejak</label><input id="fsejak" readonly /></div>
+            </div>
+            
+            <hr class="divider">
+            
+            <div id="dynamic-fields">
+                </div>
+            
+            <button id="add-field-btn" class="add-btn-minimalist"><i class="material-icons">add</i> Tambah Keterangan</button>
+            
+            <div id="notif"></div>
+        </div>
+    </main>
 
-  <header>
-    <img id="foto" src="1.png" alt="Foto" onclick="toggleSidebar()" />
-    <div>
-      <h1 id="fnamaHeader">Profil Pustakawan</h1>
-      <small id="fjabatanHeader"></small>
-    </div>
-  </header>
+    <nav class="bottom-nav">
+        <a href="beranda.html?id=" id="linkBeranda" class="nav-item">
+            <i class="material-icons">home</i>
+            <span>Beranda</span>
+        </a>
+        <a href="catatan.html?id=" id="linkCatatan" class="nav-item">
+            <i class="material-icons">note</i>
+            <span>Catatan</span>
+        </a>
+        <a href="rapat.html?id=" id="linkRapat" class="nav-item">
+            <i class="material-icons">event</i>
+            <span>Rapat</span>
+        </a>
+        <a href="profil.html?id=" id="linkProfil" class="nav-item active">
+            <i class="material-icons">person</i>
+            <span>Profil</span>
+        </a>
+    </nav>
 
-  <aside id="sidebar">
-    <h2>📚 Menu</h2>
-    <a href="profil.html?id=" id="linkProfil">👤 Profil</a>
-    <a href="beranda.html?id=" id="linkBeranda">🏠 Beranda</a>
-    <a href="penugasan.html?id=" id="linkPenugasan">📄 Penugasan</a>
-    <a href="catatan.html?id=" id="linkCatatan">📔 Catatan</a>
-    <a href="chat.html?id=" id="linkChat">💬 Chat</a>
-    <a href="chat-umum.html?id=" id="linkChatUmum">💬 Chat Umum</a>
-    <a href="rapat.html?id=" id="linkRapat">📅 Rapat</a>
-    <a href="daftarpustakawan.html?id=" id="linkDaftarPustakawan">👤 Daftar Pustakawan</a>
-  </aside>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, get, update, push, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  <main>
-    <div id="profilBox">
-      <div class="info"><label>ID</label><input id="fid" readonly /></div>
-      <div class="info"><label>Nama</label><input id="fnama" readonly /></div>
-      <div class="info"><label>Anggota Sejak</label><input id="fsejak" readonly /></div>
-      <div class="info"><label>Jabatan</label><input id="fjabatan" readonly /></div>
-      <div class="info"><label>Nomor Telepon</label><input id="ftelepon" readonly /></div>
-      <div class="info"><label>Email</label><input id="femail" readonly /></div>
-      <div class="info"><label>Alamat</label><input id="falamat" readonly /></div>
-      <div class="info"><label>Tempat Tanggal Lahir</label><input id="fttl" readonly /></div>
-      <div class="info"><label>Instagram</label><input id="fig" readonly /></div>
-      <div class="info"><label>Facebook</label><input id="ffb" readonly /></div>
-      <div class="info"><label>TikTok</label><input id="ftiktok" readonly /></div>
-      <div class="tombol-aksi">
-        <button onclick="aktifkanEdit()">Edit Profil</button>
-        <button onclick="simpanProfil()">Simpan</button>
-      </div>
-      <div id="notif"></div>
-    </div>
-  </main>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
+            authDomain: "pustakawan-26664.firebaseapp.com",
+            projectId: "pustakawan-26664",
+            storageBucket: "pustakawan-26664.appspot.com",
+            messagingSenderId: "284579513964",
+            appId: "1:284579513964:web:b45f73ac287e1f49eeba49",
+            databaseURL: "https://pustakawan-26664-default-rtdb.firebaseio.com"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+        const urlParams = new URLSearchParams(location.search);
+        const userId = urlParams.get("id");
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
-      authDomain: "pustakawan-26664.firebaseapp.com",
-      projectId: "pustakawan-26664",
-      storageBucket: "pustakawan-26664.appspot.com",
-      messagingSenderId: "284579513964",
-      appId: "1:284579513964:web:b45f73ac287e1f49eeba49",
-      databaseURL: "https://pustakawan-26664-default-rtdb.firebaseio.com"
-    };
+        if (!userId) {
+            document.body.innerHTML = "<main style='padding:64px 24px;font-size:18px;'>Akses ditolak. Mohon login.</main>";
+            throw new Error("Akses ditolak");
+        }
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+        const refs = {
+            fid: document.getElementById("fid"),
+            fsejak: document.getElementById("fsejak"),
+            fnamaHeader: document.getElementById("fnamaHeader"),
+            fjabatanHeader: document.getElementById("fjabatanHeader"),
+            fnamaDisplay: document.getElementById("fnamaDisplay"),
+            fjabatanDisplay: document.getElementById("fjabatanDisplay"),
+        };
+        
+        const dynamicFieldsContainer = document.getElementById("dynamic-fields");
+        const notif = document.getElementById("notif");
+        const tombolAksi = document.getElementById("tombolAksi");
+        const addFieldBtn = document.getElementById("add-field-btn");
 
-    const urlParams = new URLSearchParams(location.search);
-    const id = urlParams.get("id");
+        function tampilNotif(teks, warna = "#f44336") {
+            notif.textContent = teks;
+            notif.style.color = warna;
+        }
 
-    const refs = {
-      fid: document.getElementById("fid"),
-      fnama: document.getElementById("fnama"),
-      fsejak: document.getElementById("fsejak"),
-      fjabatan: document.getElementById("fjabatan"),
-      ftelepon: document.getElementById("ftelepon"),
-      femail: document.getElementById("femail"),
-      falamat: document.getElementById("falamat"),
-      fttl: document.getElementById("fttl"),
-      fig: document.getElementById("fig"),
-      ffb: document.getElementById("ffb"),
-      ftiktok: document.getElementById("ftiktok"),
-      fnamaHeader: document.getElementById("fnamaHeader"),
-      fjabatanHeader: document.getElementById("fjabatanHeader")
-    };
+        async function muatProfil() {
+            const linkIDs = ["linkBeranda", "linkCatatan", "linkRapat", "linkProfil"];
+            linkIDs.forEach(linkId => {
+                const el = document.getElementById(linkId);
+                if (el) {
+                    const url = new URL(el.getAttribute("href"), location.href);
+                    url.searchParams.set("id", userId);
+                    el.setAttribute("href", url.toString());
+                }
+            });
 
-    const notif = document.getElementById("notif");
+            const refData = ref(db, `pustakawan/${userId}`);
+            const snap = await get(refData);
+            if (snap.exists()) {
+                const data = snap.val();
+                
+                refs.fid.value = userId;
+                refs.fsejak.value = data.sejak || "";
+                
+                refs.fnamaHeader.textContent = data.nama || "(Tanpa Nama)";
+                refs.fjabatanHeader.textContent = data.jabatan || "";
+                refs.fnamaDisplay.textContent = data.nama || "(Tanpa Nama)";
+                refs.fjabatanDisplay.textContent = data.jabatan || "";
+                
+            } else {
+                tampilNotif("Profil tidak ditemukan", "red");
+            }
+        }
+        
+        let isEditing = false;
+        
+        function renderDynamicFields(data) {
+            // Urutkan data berdasarkan properti 'order'
+            const sortedData = Object.keys(data || {}).map(key => ({
+                id: key,
+                ...data[key]
+            })).sort((a, b) => (a.order || 9999) - (b.order || 9999));
 
-    function tampilNotif(teks, warna = "#fdd835") {
-      notif.textContent = teks;
-      notif.style.color = warna;
-    }
+            dynamicFieldsContainer.innerHTML = "";
+            const totalFields = sortedData.length;
 
-    async function muatProfil() {
-      if (!id) {
-        tampilNotif("ID tidak ditemukan di URL.", "red");
-        return;
-      }
+            sortedData.forEach(field => {
+                const div = document.createElement("div");
+                div.className = "dynamic-field info";
+                div.setAttribute("data-key", field.id);
 
-     const linkIDs = [
-      "linkProfil",
-      "linkBeranda",
-      "linkPenugasan",
-      "linkCatatan",
-      "linkChat",
-      "linkChatUmum",
-      "linkRapat",
-      "linkDaftarPustakawan"
-    ];
-      linkIDs.forEach(linkId => {
-        const el = document.getElementById(linkId);
-        if (el && id) el.href += id;
-      });
+                if (isEditing) {
+                    // Buat dropdown untuk urutan
+                    let orderOptions = '';
+                    for (let i = 1; i <= totalFields; i++) {
+                        orderOptions += `<option value="${i}" ${field.order == i ? 'selected' : ''}>Posisi ${i}</option>`;
+                    }
 
-      const refData = ref(db, `pustakawan/${id}`);
-      const snap = await get(refData);
+                    div.innerHTML = `
+                        <div class="field-header">
+                            <label>Urutan:</label>
+                            <select class="field-order">${orderOptions}</select>
+                        </div>
+                        <label>
+                            <input type="text" class="field-title" value="${field.title || ''}" placeholder="Judul Keterangan" />
+                        </label>
+                        <input type="text" class="field-value" value="${field.value || ''}" placeholder="Isi Keterangan" />
+                        <button class="delete-btn"><i class="material-icons">close</i></button>
+                    `;
+                    div.querySelector('.delete-btn').addEventListener('click', () => hapusKeterangan(field.id));
+                } else {
+                    div.innerHTML = `
+                        <label>${field.title || ''}</label>
+                        <input type="text" value="${field.value || ''}" readonly />
+                    `;
+                }
 
-      if (snap.exists()) {
-        const data = snap.val();
-        refs.fid.value = id;
-        refs.fnama.value = data.nama || "";
-        refs.fsejak.value = data.sejak || "";
-        refs.fjabatan.value = data.jabatan || "";
-        refs.ftelepon.value = data.telepon || "";
-        refs.femail.value = data.email || "";
-        refs.falamat.value = data.alamat || "";
-        refs.fttl.value = data.ttl || "";
-        refs.fig.value = data.ig || "";
-        refs.ffb.value = data.fb || "";
-        refs.ftiktok.value = data.tiktok || "";
-        refs.fnamaHeader.textContent = data.nama || "(Tanpa Nama)";
-        refs.fjabatanHeader.textContent = data.jabatan || "";
-      } else {
-        tampilNotif("Profil tidak ditemukan", "red");
-      }
-    }
+                dynamicFieldsContainer.appendChild(div);
+            });
+        }
 
-    window.aktifkanEdit = function () {
-      ["fnama", "fsejak", "fjabatan", "ftelepon", "femail", "falamat", "fttl", "fig", "ffb", "ftiktok"]
-        .forEach(key => refs[key].readOnly = false);
-      tampilNotif("Mode edit diaktifkan.", "#4caf50");
-    };
+        function toggleEditMode() {
+            isEditing = !isEditing;
+            tombolAksi.innerHTML = isEditing ? '<i class="material-icons">done</i>' : '<i class="material-icons">edit</i>';
+            addFieldBtn.style.display = isEditing ? 'flex' : 'none';
+            
+            tampilNotif(isEditing ? "Mode edit diaktifkan. Anda bisa menambah/menghapus keterangan." : "", isEditing ? "#4caf50" : "");
+            
+            onValue(ref(db, `pustakawan/${userId}/keteranganTambahan`), (snapshot) => {
+                const data = snapshot.val() || {};
+                renderDynamicFields(data);
+            }, { onlyOnce: true });
+        }
+        
+        async function tambahKeterangan() {
+            const snapshot = await get(ref(db, `pustakawan/${userId}/keteranganTambahan`));
+            const existingData = snapshot.val() || {};
+            const nextOrder = Object.keys(existingData).length + 1;
 
-    window.simpanProfil = async function () {
-      if (!id) return tampilNotif("ID tidak valid", "red");
+            const newFieldRef = push(ref(db, `pustakawan/${userId}/keteranganTambahan`));
+            await update(newFieldRef, {
+                title: '',
+                value: '',
+                order: nextOrder
+            });
+        }
 
-      const data = {
-        nama: refs.fnama.value.trim(),
-        sejak: refs.fsejak.value.trim(),
-        jabatan: refs.fjabatan.value.trim(),
-        telepon: refs.ftelepon.value.trim(),
-        email: refs.femail.value.trim(),
-        alamat: refs.falamat.value.trim(),
-        ttl: refs.fttl.value.trim(),
-        ig: refs.fig.value.trim(),
-        fb: refs.ffb.value.trim(),
-        tiktok: refs.ftiktok.value.trim()
-      };
+        async function simpanPerubahan() {
+            const fieldsToUpdate = {};
+            const dynamicFields = document.querySelectorAll('.dynamic-field');
+            const newOrderMap = new Map();
+            let newOrderCounter = 1;
 
-      try {
-        await update(ref(db, `pustakawan/${id}`), data);
+            // Prioritaskan urutan dari dropdown, jika ada duplikasi, urutkan ulang
+            const orderedInputs = [...dynamicFields].sort((a, b) => {
+                const orderA = parseInt(a.querySelector('.field-order').value);
+                const orderB = parseInt(b.querySelector('.field-order').value);
+                return orderA - orderB;
+            });
+            
+            orderedInputs.forEach(field => {
+                const key = field.getAttribute('data-key');
+                const title = field.querySelector('.field-title').value.trim();
+                const value = field.querySelector('.field-value').value.trim();
+                
+                if (title || value) {
+                    fieldsToUpdate[key] = {
+                        title,
+                        value,
+                        order: newOrderCounter++
+                    };
+                } else {
+                    // Hapus data jika judul & isi kosong
+                    remove(ref(db, `pustakawan/${userId}/keteranganTambahan/${key}`));
+                }
+            });
+            
+            try {
+                // Update semua data keterangan tambahan
+                await update(ref(db, `pustakawan/${userId}/keteranganTambahan`), fieldsToUpdate);
+                tampilNotif("✅ Profil berhasil disimpan.", "#4caf50");
+                toggleEditMode();
+            } catch (err) {
+                console.error(err);
+                tampilNotif("❌ Gagal menyimpan profil.", "red");
+            }
+        }
 
-        ["fnama", "fsejak", "fjabatan", "ftelepon", "femail", "falamat", "fttl", "fig", "ffb", "ftiktok"]
-          .forEach(key => refs[key].readOnly = true);
+        async function hapusKeterangan(key) {
+            if (confirm("Yakin ingin menghapus keterangan ini?")) {
+                await remove(ref(db, `pustakawan/${userId}/keteranganTambahan/${key}`));
+            }
+        }
+        
+        tombolAksi.addEventListener('click', () => {
+            if (isEditing) {
+                simpanPerubahan();
+            } else {
+                toggleEditMode();
+            }
+        });
+        
+        addFieldBtn.addEventListener('click', tambahKeterangan);
+        
+        onValue(ref(db, `pustakawan/${userId}/keteranganTambahan`), (snapshot) => {
+            const data = snapshot.val() || {};
+            renderDynamicFields(data);
+        });
 
-        refs.fnamaHeader.textContent = data.nama || "(Tanpa Nama)";
-        refs.fjabatanHeader.textContent = data.jabatan || "";
-
-        tampilNotif("✅ Profil berhasil disimpan.", "#4caf50");
-      } catch (err) {
-        console.error(err);
-        tampilNotif("❌ Gagal menyimpan profil.", "red");
-      }
-    };
-
-    window.toggleSidebar = () => {
-      const sidebar = document.getElementById("sidebar");
-      const overlay = document.getElementById("overlay");
-      const show = !sidebar.classList.contains("show");
-      sidebar.classList.toggle("show", show);
-      overlay.classList.toggle("show", show);
-    };
-
-    window.tutupSidebar = () => {
-      document.getElementById("sidebar").classList.remove("show");
-      document.getElementById("overlay").classList.remove("show");
-    };
-
-    muatProfil();
-  </script>
+        muatProfil();
+    </script>
 </body>
 </html>
