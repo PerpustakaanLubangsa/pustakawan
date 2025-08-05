@@ -3,175 +3,155 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Chat Umum</title>
+  <title>Obrolan</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
+    /* Gaya Dasar */
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: #121212;
-      color: white;
+      background: #EBE5DF;
+      color: #111B21;
       display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      padding-top: 52px;
     }
 
+    /* Header */
     header {
       position: fixed;
       top: 0; left: 0;
       width: 100%;
-      height: 64px;
-      background: #1e1e1e;
+      height: 52px;
+      background: #006778;
+      color: white;
       display: flex;
       align-items: center;
       padding: 0 16px;
       border-bottom: 1px solid #333;
       z-index: 1001;
     }
-
-    header img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      margin-right: 12px;
-      cursor: pointer;
-    }
-
+    
     header h1 {
       font-size: 18px;
       margin: 0;
+      /* Perubahan: Mengubah tata letak untuk memindahkan judul ke kiri */
+      margin-left: 16px;
     }
-
-    header small {
-      font-size: 12px;
-      color: #ccc;
-    }
-
-    aside {
-      position: fixed;
-      top: 64px;
-      left: 0;
-      width: 240px;
-      height: calc(100vh - 64px);
-      background: #1f1f1f;
-      padding: 24px 16px;
-      overflow-y: auto;
-      z-index: 1002;
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
-    }
-
-    aside.show {
-      transform: translateX(0);
-    }
-
-    @media (min-width: 768px) {
-      aside {
-        transform: none !important;
-      }
-    }
-
-    aside h2 {
-      font-size: 18px;
-      margin-top: 0;
-      margin-bottom: 24px;
-    }
-
-        aside a {
-       display: block;
-  color: #ccc;
-  text-decoration: none;
-  padding: 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  margin-bottom: 8px;
-  background: #2a2a2a;
-  transition: background 0.2s;
-}
-
-    aside a:hover {
-      background: #2a2a2a;
+    
+    header .back-btn {
       color: white;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      font-size: 24px;
+      transition: transform 0.2s;
     }
 
+    header .back-btn:active {
+      transform: scale(0.9);
+    }
+
+    /* Area Chat */
     main {
       flex: 1;
-      padding: 88px 16px 80px;
+      padding: 8px 16px;
       display: flex;
       flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    @media (min-width: 768px) {
-      main {
-        margin-left: 240px;
-      }
-    }
-
-    #chatArea {
-      flex: 1;
       overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+      padding-bottom: 72px;
     }
 
+    /* Gelembung Pesan (Chat Bubbles) */
     .bubble {
-      background: #1e1e1e;
-      border: 1px solid #333;
-      padding: 10px 14px;
-      border-radius: 10px;
-      max-width: 90%;
+      background: #FFFFFF;
+      padding: 8px 12px 6px 12px;
+      border-radius: 8px;
+      max-width: 80%;
       word-wrap: break-word;
       align-self: flex-start;
+      margin-bottom: 12px;
+      position: relative;
+      margin-right: auto;
     }
 
-    .bubble .meta {
-      font-size: 12px;
-      color: #aaa;
-      margin-bottom: 4px;
+    /* Membuat "ekor" pada gelembung pesan orang lain */
+    .bubble::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -10px;
+      border-top: 8px solid transparent;
+      border-right: 12px solid #FFFFFF;
+      border-bottom: 8px solid transparent;
     }
 
     .bubble.mine {
       align-self: flex-end;
-      background: #2a2a2a;
+      background: #C9E7EA;
+      border-radius: 8px;
+      margin-left: auto;
+      margin-right: 0;
+    }
+    
+    /* Menghilangkan ekor pada gelembung pesan saya */
+    .bubble.mine::before {
+      display: none;
     }
 
+    .bubble .meta {
+      font-size: 10px;
+      color: #064039;
+      margin-bottom: 4px;
+      font-weight: bold;
+    }
+    
+    .bubble .timestamp {
+      font-size: 10px;
+      color: #888;
+      margin-top: 4px;
+      text-align: right;
+    }
+    
+    /* Input Form */
     form {
       display: flex;
       position: fixed;
-      bottom: env(keyboard-inset-height, 0);
+      bottom: 0;
       left: 0;
       right: 0;
-      background: #1a1a1a;
-      padding: 12px 16px;
+      background: transparent;
+      padding: 8px 16px;
       gap: 8px;
       z-index: 1001;
-      border-top: 1px solid #333;
-    }
-
-    @media (min-width: 768px) {
-      form { left: 240px; }
     }
 
     form input {
       flex: 1;
-      padding: 10px;
+      padding: 10px 16px;
       font-size: 16px;
-      border: 1px solid #444;
-      border-radius: 20px;
-      background: #2a2a2a;
-      color: white;
+      border: none;
+      border-radius: 24px;
+      background: #FFFFFF;
+      color: #111B21;
+      outline: none;
     }
 
     form button {
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       font-size: 20px;
       border: none;
       border-radius: 50%;
-      background: rgba(255,255,255,0.1);
+      background: #00ACC1;
       color: white;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .loading {
@@ -180,203 +160,167 @@
       margin-top: 20px;
       font-style: italic;
     }
-
-    #overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.5);
-      z-index: 1000;
-    }
-
-    #overlay.show {
-      display: block;
-    }
-
-    @media (min-width: 768px) {
-      #overlay {
-        display: none !important;
-      }
-    }
   </style>
 </head>
 <body>
 
-  <div id="overlay" onclick="tutupSidebar()"></div>
-
   <header>
-    <img src="1.png" alt="Foto" onclick="toggleSidebar()" />
-    <div style="flex-grow: 1;">
-      <h1 id="fnamaHeader">Chat Umum</h1>
-      <small id="fjabatanHeader"></small>
-    </div>
+    <a href="javascript:history.back()" class="back-btn"><i class="material-icons">arrow_back</i></a>
+    <h1>Obrolan</h1>
   </header>
 
-   <aside id="sidebar">
-    <h2>📚 Menu</h2>
-    <a href="profil.html?id=" id="linkProfil">👤 Profil</a>
-    <a href="beranda.html?id=" id="linkBeranda">🏠 Beranda</a>
-    <a href="penugasan.html?id=" id="linkPenugasan">📄 Penugasan</a>
-    <a href="catatan.html?id=" id="linkCatatan">📔 Catatan</a>
-    <a href="chat.html?id=" id="linkChat">💬 Chat</a>
-    <a href="chat-umum.html?id=" id="linkChatUmum">💬 Chat Umum</a>
-    <a href="rapat.html?id=" id="linkRapat">📅 Rapat</a>
-    <a href="daftarpustakawan.html?id=" id="linkDaftarPustakawan">👤 Daftar Pustakawan</a>
-  </aside>
-
   <main>
-    <div id="chatArea"><div class="loading">Memuat pesan...</div></div>
+    <div id="chatArea">
+      <div class="loading">Memuat pesan...</div>
+    </div>
   </main>
 
   <form onsubmit="kirimPesan(event)">
-    <input id="pesanInput" placeholder="Tulis pesan..." autocomplete="off" />
-    <button type="submit">➤</button>
+    <input id="pesanInput" placeholder="Ketik pesan..." autocomplete="off" />
+    <button type="submit"><i class="material-icons">send</i></button>
   </form>
 
- <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import {
-    getDatabase, ref, push, set, onChildAdded, onChildRemoved, remove, get
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getDatabase, ref, push, set, onChildAdded, remove, get, query, limitToLast
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
-    authDomain: "pustakawan-26664.firebaseapp.com",
-    projectId: "pustakawan-26664",
-    storageBucket: "pustakawan-26664.appspot.com",
-    messagingSenderId: "284579513964",
-    appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
+      authDomain: "pustakawan-26664.firebaseapp.com",
+      projectId: "pustakawan-26664",
+      storageBucket: "pustakawan-26664.appspot.com",
+      messagingSenderId: "284579513964",
+      appId: "1:284579513964:web:b45f73ac287e1f49eeba49",
+      databaseURL: "https://pustakawan-26664-default-rtdb.firebaseio.com"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const urlParams = new URLSearchParams(location.search);
-  const id = urlParams.get("id");
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const urlParams = new URLSearchParams(location.search);
+    const id = urlParams.get("id");
 
-  const chatRef = ref(db, "chatumum");
-  const chatArea = document.getElementById("chatArea");
-  const pesanInput = document.getElementById("pesanInput");
-  const namaHeader = document.getElementById("fnamaHeader");
-  const jabatanHeader = document.getElementById("fjabatanHeader");
+    const chatRef = ref(db, "chatumum");
+    const chatLimit = 50;
+    const chatQuery = query(chatRef, limitToLast(chatLimit));
+    const chatArea = document.getElementById("chatArea");
+    const pesanInput = document.getElementById("pesanInput");
+    const mainElement = document.querySelector('main');
 
-  // ✅ Perbaikan penyisipan ID ke semua tautan
- const linkIDs = [
-      "linkProfil",
-      "linkBeranda",
-      "linkPenugasan",
-      "linkCatatan",
-      "linkChat",
-      "linkChatUmum",
-      "linkRapat",
-      "linkDaftarPustakawan"
-    ];
+    let nama = "Mguest";
+    let userId = null;
 
-  linkIDs.forEach(linkID => {
-    const el = document.getElementById(linkID);
-    if (el && id) {
-      const href = new URL(el.getAttribute("href"), location.href);
-      href.searchParams.set("id", id);
-      el.setAttribute("href", href.toString());
+    // Fungsi terpisah untuk scroll ke bawah
+    function scrollToBottom() {
+        mainElement.scrollTop = mainElement.scrollHeight;
     }
-  });
 
-  let nama = "Mguest";
-  let userId = null;
+    async function init() {
+      if (!id) {
+        document.body.innerHTML = "<main style='padding:64px 24px;font-size:18px;'>Akses ditolak. Mohon login.</main>";
+        return;
+      }
 
-  async function init() {
-    if (id) {
       const snap = await get(ref(db, `pustakawan/${id}`));
       if (snap.exists()) {
         const data = snap.val();
         nama = data.nama || "Pustakawan";
         userId = id;
-        namaHeader.textContent = nama;
-        jabatanHeader.textContent = data.jabatan || "";
       }
+
+      // 1. Muat 50 pesan terakhir dan scroll satu kali
+      get(chatQuery).then((snapshot) => {
+        const loading = document.querySelector('.loading');
+        if (loading) loading.remove();
+
+        if (snapshot.exists()) {
+          const pesan = snapshot.val();
+          for (const key in pesan) {
+            tampilkanPesan(key, pesan[key]);
+          }
+        }
+        // Jalankan scroll setelah browser selesai merender pesan awal
+        setTimeout(() => {
+          requestAnimationFrame(scrollToBottom);
+        }, 100);
+      });
+
+      // 2. Dengarkan pesan baru secara real-time
+      onChildAdded(chatRef, (snap) => {
+          const key = snap.key;
+          const data = snap.val();
+          
+          if (!document.querySelector(`[data-id='${key}']`)) {
+              tampilkanPesan(key, data);
+              // Jalankan scroll setelah browser selesai merender pesan baru
+              setTimeout(() => {
+                requestAnimationFrame(scrollToBottom);
+              }, 100);
+          }
+      });
+      
+      onChildAdded(query(chatRef, limitToLast(chatLimit + 1)), (snapshot) => {
+        const semuaPesan = Object.entries(snapshot.val() || {});
+        if (semuaPesan.length > chatLimit) {
+          const [terlamaKey] = semuaPesan[0];
+          remove(ref(db, `chatumum/${terlamaKey}`));
+        }
+      });
     }
 
-    onChildAdded(chatRef, async (snap) => {
-      const key = snap.key;
-      const data = snap.val();
-      tampilkanPesan(key, data);
+    function formatWaktu(timestamp) {
+      const date = new Date(timestamp);
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${hours}:${minutes}`;
+    }
 
-      const allSnap = await get(chatRef);
-      if (allSnap.exists()) {
-        const semua = Object.entries(allSnap.val());
-        if (semua.length > 25) {
-          const [terlamaKey] = semua[0];
-          await remove(ref(db, `chatumum/${terlamaKey}`));
-        }
+    function tampilkanPesan(key, data) {
+      const loading = document.querySelector('.loading');
+      if (loading) loading.remove();
+
+      const div = document.createElement("div");
+      div.className = "bubble";
+      div.dataset.id = key;
+      if (data.id === userId) {
+        div.classList.add("mine");
       }
-    });
 
-    onChildRemoved(chatRef, (snap) => {
-      const key = snap.key;
-      const ele = document.querySelector(`[data-id='${key}']`);
-      if (ele) ele.remove();
-    });
-  }
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.textContent = data.nama;
 
-  function tampilkanPesan(key, data) {
-    const loading = document.querySelector('.loading');
-    if (loading) loading.remove();
+      const isi = document.createElement("div");
+      isi.textContent = data.teks;
+      
+      const waktu = document.createElement("div");
+      waktu.className = "timestamp";
+      waktu.textContent = formatWaktu(data.waktu);
 
-    const div = document.createElement("div");
-    div.className = "bubble";
-    div.dataset.id = key;
-    if (data.id === userId) div.classList.add("mine");
+      div.appendChild(meta);
+      div.appendChild(isi);
+      div.appendChild(waktu);
+      chatArea.appendChild(div);
+    }
 
-    const meta = document.createElement("div");
-    meta.className = "meta";
-    meta.textContent = data.nama;
+    window.kirimPesan = async function (e) {
+      e.preventDefault();
+      const teks = pesanInput.value.trim();
+      if (!teks) return;
 
-    const isi = document.createElement("div");
-    isi.textContent = data.teks;
+      await set(push(chatRef), {
+        nama: nama,
+        id: userId,
+        teks: teks,
+        waktu: Date.now()
+      });
 
-    div.appendChild(meta);
-    div.appendChild(isi);
-    chatArea.appendChild(div);
-    chatArea.scrollTop = chatArea.scrollHeight;
-  }
-
-  window.kirimPesan = async function (e) {
-    e.preventDefault();
-    const teks = pesanInput.value.trim();
-    if (!teks) return;
-
-    await set(push(chatRef), {
-      nama: nama,
-      id: userId,
-      teks: teks,
-      waktu: Date.now()
-    });
-
-    pesanInput.value = "";
-  };
-
-  window.toggleSidebar = () => {
-    const sidebar = document.getElementById("sidebar");
-    const overlay = document.getElementById("overlay");
-    const show = !sidebar.classList.contains("show");
-    sidebar.classList.toggle("show", show);
-    overlay.classList.toggle("show", show);
-  };
-
-  window.tutupSidebar = () => {
-    document.getElementById("sidebar").classList.remove("show");
-    document.getElementById("overlay").classList.remove("show");
-  };
-
-  pesanInput.addEventListener("focus", () => {
-    setTimeout(() => {
-      chatArea.scrollTop = chatArea.scrollHeight;
-    }, 300);
-  });
-
-  init();
-</script>
-
+      pesanInput.value = "";
+      pesanInput.focus();
+    };
+    
+    init();
+  </script>
 </body>
 </html>
