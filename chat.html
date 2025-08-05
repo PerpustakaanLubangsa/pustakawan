@@ -4,11 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Chat Pribadi</title>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
     /* Gaya Dasar */
     * { box-sizing: border-box; }
-    body {
+    html, body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
       background: #EBE5DF;
@@ -34,25 +36,23 @@
       border-bottom: 1px solid #333;
       z-index: 1001;
     }
-    
-    header h1 {
-      font-size: 18px;
-      margin: 0;
-      margin-left: 16px;
-    }
-    
+    header h1 { font-size: 18px; margin: 0; margin-left: 16px; }
     header .back-btn {
+      color: white; text-decoration: none; display: flex;
+      align-items: center; font-size: 24px; transition: transform 0.2s;
+    }
+    header .back-btn:active { transform: scale(0.9); }
+    header .profile-icon {
+      margin-left: auto;
       color: white;
       text-decoration: none;
       display: flex;
       align-items: center;
       font-size: 24px;
       transition: transform 0.2s;
+      cursor: pointer;
     }
-
-    header .back-btn:active {
-      transform: scale(0.9);
-    }
+    header .profile-icon:active { transform: scale(0.9); }
 
     /* Area Chat */
     main {
@@ -63,42 +63,33 @@
       overflow-y: auto;
       padding-bottom: 72px;
     }
+    #chatArea {
+      display: flex;
+      flex-direction: column;
+    }
 
     /* Gelembung Pesan (Chat Bubbles) */
     .bubble {
-      background: #FFFFFF;
-      padding: 8px 12px 6px 12px;
+      padding: 8px 12px;
       border-radius: 8px;
       max-width: 80%;
       word-wrap: break-word;
-      align-self: flex-start;
-      margin-bottom: 12px;
       position: relative;
-      margin-right: auto;
+      margin-bottom: 12px;
+      animation: fadeIn 0.3s ease-in-out;
     }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Membuat "ekor" pada gelembung pesan orang lain */
-    .bubble::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -10px;
-      border-top: 8px solid transparent;
-      border-right: 12px solid #FFFFFF;
-      border-bottom: 8px solid transparent;
-    }
-
+    /* Gelembung pesan saya */
     .bubble.mine {
-      align-self: flex-end;
       background: #C9E7EA;
-      border-radius: 8px;
-      margin-left: auto;
-      margin-right: 0;
+      align-self: flex-end;
     }
-    
-    /* Menghilangkan ekor pada gelembung pesan saya */
-    .bubble.mine::before {
-      display: none;
+
+    /* Gelembung pesan orang lain */
+    .bubble.other {
+      background: #FFFFFF;
+      align-self: flex-start;
     }
     
     .bubble .timestamp {
@@ -112,9 +103,7 @@
     #formKirim {
       display: flex;
       position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: 0; left: 0; right: 0;
       background: transparent;
       padding: 8px 16px;
       gap: 8px;
@@ -122,35 +111,20 @@
     }
 
     #formKirim input {
-      flex: 1;
-      padding: 10px 16px;
-      font-size: 16px;
-      border: none;
-      border-radius: 24px;
-      background: #FFFFFF;
-      color: #111B21;
-      outline: none;
+      flex: 1; padding: 10px 16px; font-size: 16px;
+      border: none; border-radius: 24px;
+      background: #FFFFFF; color: #111B21; outline: none;
     }
 
     #formKirim button {
-      width: 44px;
-      height: 44px;
-      font-size: 20px;
-      border: none;
-      border-radius: 50%;
-      background: #00ACC1;
-      color: white;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 44px; height: 44px; font-size: 20px;
+      border: none; border-radius: 50%;
+      background: #00ACC1; color: white; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
     }
 
     .loading {
-      text-align: center;
-      color: #aaa;
-      margin-top: 20px;
-      font-style: italic;
+      text-align: center; color: #aaa; margin-top: 20px; font-style: italic;
     }
   </style>
 </head>
@@ -159,11 +133,12 @@
   <header>
     <a href="javascript:history.back()" class="back-btn"><i class="material-icons">arrow_back</i></a>
     <h1 id="fnamaHeader">Memuat...</h1>
+    <a href="profil2.html" class="profile-icon"><i class="material-icons">account_circle</i></a>
   </header>
 
   <main>
     <div id="chatArea">
-      <div class="loading">Pilih kontak untuk memulai chat.</div>
+      <div class="loading">Memuat pesan...</div>
     </div>
   </main>
 
@@ -175,7 +150,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import {
-      getDatabase, ref, push, set, onChildAdded, get, query, limitToLast, remove, onValue
+      getDatabase, ref, push, set, onChildAdded, get, query, limitToLast, remove
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -203,7 +178,6 @@
     
     let nama = "Anonim";
     let chatRef = null;
-    let pesanQuery = null;
 
     async function getNamaPustakawan(pustakawanId) {
         if (!pustakawanId) return "Anonim";
@@ -223,8 +197,7 @@
 
         const snap = await get(ref(db, `pustakawan/${id}`));
         if (snap.exists()) {
-            const data = snap.val();
-            nama = data.nama || "Pustakawan";
+            nama = snap.val().nama || "Pustakawan";
         }
 
         if (!tujuan) {
@@ -239,47 +212,41 @@
 
         const pasangan = [id, tujuan].sort().join("_");
         chatRef = ref(db, `chatpribadi/${pasangan}`);
-        pesanQuery = query(chatRef, limitToLast(50));
 
-        // Hapus pesan "Memuat..." jika ada
+        // Menghapus pesan "Memuat..." jika ada
         const loadingDiv = document.querySelector('.loading');
         if (loadingDiv) loadingDiv.remove();
-
-        get(pesanQuery).then((snapshot) => {
-            if (snapshot.exists()) {
-                const pesan = snapshot.val();
-                for (const key in pesan) {
-                    tampilkanPesan(key, pesan[key]);
-                }
-            }
-            setTimeout(() => {
-                requestAnimationFrame(scrollToBottom);
-            }, 100);
-        });
-
-        onChildAdded(chatRef, (snap) => {
-            const key = snap.key;
-            const data = snap.val();
+        
+        // Menggunakan onChildAdded untuk memuat pesan awal dan pesan baru
+        onChildAdded(query(chatRef, limitToLast(50)), (snapshot) => {
+            const key = snapshot.key;
+            const data = snapshot.val();
+            // Memastikan pesan belum ada di DOM untuk menghindari duplikasi
             if (!document.querySelector(`[data-id='${key}']`)) {
                 tampilkanPesan(key, data);
-                setTimeout(() => {
-                    requestAnimationFrame(scrollToBottom);
-                }, 100);
+                requestAnimationFrame(scrollToBottom);
             }
+            
+            // Logika untuk menandai pesan sebagai "dibaca"
             if (data.dari === tujuan && data.ke === id && !data.dibaca) {
-                set(ref(db, `chatpribadi/${pasangan}/${snap.key}`), {
+                set(ref(db, `chatpribadi/${pasangan}/${key}`), {
                     ...data,
                     dibaca: true
                 });
             }
         });
-
+        
+        // Logika unik untuk membatasi jumlah pesan menjadi 50
         onChildAdded(query(chatRef, limitToLast(51)), (snapshot) => {
-            const semuaPesan = Object.entries(snapshot.val() || {});
-            if (semuaPesan.length > 50) {
-                const [terlamaKey] = semuaPesan[0];
-                remove(ref(db, `chatpribadi/${pasangan}/${terlamaKey}`));
-            }
+            const parentNode = snapshot.ref.parent;
+            parentNode.once('value').then(snap => {
+                const data = snap.val();
+                const keys = Object.keys(data || {});
+                if (keys.length > 50) {
+                    const terlamaKey = keys[0];
+                    remove(ref(db, `chatpribadi/${pasangan}/${terlamaKey}`));
+                }
+            });
         });
 
         formKirim.addEventListener("submit", kirimPesan);
@@ -296,8 +263,11 @@
       const div = document.createElement("div");
       div.className = "bubble";
       div.dataset.id = key;
+
       if (data.dari === id) {
         div.classList.add("mine");
+      } else {
+        div.classList.add("other");
       }
 
       const isi = document.createElement("div");
@@ -317,7 +287,8 @@
       const teks = pesanInput.value.trim();
       if (!teks) return;
 
-      await set(push(chatRef), {
+      const pesanBaruRef = push(chatRef);
+      await set(pesanBaruRef, {
         dari: id,
         ke: tujuan,
         nama: nama,
