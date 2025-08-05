@@ -1,287 +1,282 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Rapat</title>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      background: #121212;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Rapat</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        /* Gaya Dasar */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-    header {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      height: 64px;
-      background: #1e1e1e;
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-      border-bottom: 1px solid #333;
-      z-index: 1001;
-    }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background: #f0f2f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding-top: 52px;
+            padding-bottom: 72px; 
+        }
 
-    header .menu-icon {
-      font-size: 24px;
-      cursor: pointer;
-      margin-right: 12px;
-    }
+        /* Header yang Tetap di Atas */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            width: 100%;
+            height: auto;
+            background: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 24px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        header .title-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+        }
 
-    header h1 {
-      font-size: 18px;
-      margin: 0;
-    }
+        header h1 {
+            font-size: 18px;
+            margin: 0;
+            color: #00ACC1;
+        }
+        
+        header small {
+            font-size: 12px;
+            color: #777;
+            margin-top: 2px;
+        }
 
-    header button {
-      margin-left: auto;
-      background: #2c2c2c;
-      border: none;
-      color: white;
-      font-size: 20px;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      cursor: pointer;
-    }
+        /* Konten Utama */
+        main {
+            flex: 1;
+            padding: 16px 24px;
+            width: 100%;
+        }
 
-    aside {
-      position: fixed;
-      top: 64px;
-      left: 0;
-      width: 240px;
-      height: calc(100vh - 64px);
-      background: #1f1f1f;
-      padding: 24px 16px;
-      overflow-y: auto;
-      z-index: 1002;
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
-    }
+        /* Daftar Rapat */
+        .rapat {
+            background: #ffffff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
 
-    aside.show { transform: translateX(0); }
+        .rapat-title { 
+            font-weight: bold; 
+            font-size: 16px; 
+            color: #00ACC1; 
+            flex-grow: 1;
+        }
 
-    @media (min-width: 768px) {
-      aside { transform: none !important; }
-    }
+        .rapat-buttons {
+            display: flex;
+        }
 
-    aside h2 { font-size: 18px; margin-top: 0; margin-bottom: 24px; }
-    aside a {
-      display: block;
-      color: #ccc;
-      text-decoration: none;
-      padding: 12px;
-      border-radius: 6px;
-      font-size: 14px;
-      margin-bottom: 8px;
-      background: #2a2a2a;
-    }
-    aside a:hover { background: #333; color: white; }
+        .rapat-buttons button {
+            padding: 10px 12px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: #00ACC1;
+            color: white;
+            transition: background 0.2s;
+        }
+        
+        .rapat-buttons button:hover {
+            background: #008D9C;
+        }
+        
+        .rapat-buttons button .material-icons {
+            font-size: 18px;
+        }
+        
+        /* Navigasi Bawah yang Tetap */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 60px;
+            background: #ffffff;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            height: 100%;
+            text-decoration: none;
+            color: #888;
+            transition: color 0.2s;
+        }
 
-    main {
-      margin-top: 64px;
-      margin-left: 0;
-      padding: 24px;
-      flex: 1;
-      transition: margin-left 0.3s ease;
-    }
+        .bottom-nav .nav-item.active {
+            color: #00ACC1;
+        }
 
-    @media (min-width: 768px) {
-      main { margin-left: 240px; }
-    }
+        .bottom-nav .nav-item:hover {
+            color: #00ACC1;
+        }
 
-    #formRapat {
-      display: none;
-      background: #1e1e1e;
-      border: 1px solid #333;
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 24px;
-      width: 100%;
-      max-width: 600px;
-    }
-
-    #formRapat input {
-      padding: 8px;
-      width: 100%;
-      margin-bottom: 12px;
-      border-radius: 4px;
-      border: none;
-      background: #2a2a2a;
-      color: white;
-    }
-
-    #formRapat button {
-      padding: 10px 16px;
-      background: #007acc;
-      border: none;
-      color: white;
-      border-radius: 4px;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    .rapat {
-      background: #1e1e1e;
-      border: 1px solid #333;
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 12px;
-      width: 100%;
-      max-width: 600px;
-    }
-
-    .rapat-title { font-weight: bold; margin-bottom: 4px; }
-    .rapat-buttons button {
-      margin-right: 8px;
-      padding: 6px 12px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .masuk { background: #007acc; color: white; }
-    .hapus { background: #aa3333; color: white; }
-  </style>
+        .bottom-nav .nav-item .material-icons {
+            font-size: 24px;
+            margin-bottom: 2px;
+        }
+        
+        .bottom-nav .nav-item span {
+            font-size: 10px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <div class="menu-icon" onclick="toggleSidebar()">☰</div>
-    <h1>Daftar Rapat</h1>
-    <button onclick="toggleForm()">+</button>
-  </header>
+    <header>
+        <div class="title-container">
+            <h1 id="fnamaHeader">Rapat</h1>
+            <small id="fjabatanHeader"></small>
+        </div>
+    </header>
 
-  <aside id="sidebar">
-    <h2>📚 Menu</h2>
-    <a href="profil.html?id=" id="linkProfil">👤 Profil</a>
-    <a href="beranda.html?id=" id="linkBeranda">🏠 Beranda</a>
-    <a href="penugasan.html?id=" id="linkPenugasan">📄 Penugasan</a>
-    <a href="catatan.html?id=" id="linkCatatan">📔 Catatan</a>
-    <a href="chat.html?id=" id="linkChat">💬 Chat</a>
-    <a href="chat-umum.html?id=" id="linkChatUmum">💬 Chat Umum</a>
-    <a href="rapat.html?id=" id="linkRapat">📅 Rapat</a>
-    <a href="daftarpustakawan.html?id=" id="linkDaftarPustakawan">👤 Daftar Pustakawan</a>
-  </aside>
+    <main>
+        <div id="daftarRapat"></div>
+    </main>
 
-  <main>
-    <div id="formRapat">
-      <input type="text" id="judul" placeholder="Judul Rapat" />
-      <button onclick="buatRapat()">Buat Rapat</button>
-    </div>
-    <div id="daftarRapat"></div>
-  </main>
+    <nav class="bottom-nav">
+        <a href="beranda.html?id=" id="linkBeranda" class="nav-item">
+            <i class="material-icons">home</i>
+            <span>Beranda</span>
+        </a>
+        <a href="catatan.html?id=" id="linkCatatan" class="nav-item">
+            <i class="material-icons">note</i>
+            <span>Catatan</span>
+        </a>
+        <a href="rapat.html?id=" id="linkRapat" class="nav-item active">
+            <i class="material-icons">event</i>
+            <span>Rapat</span>
+        </a>
+        <a href="profil.html?id=" id="linkProfil" class="nav-item">
+            <i class="material-icons">person</i>
+            <span>Profil</span>
+        </a>
+    </nav>
 
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const userId = urlParams.get("id");
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    const firebaseConfig = {
-      databaseURL: "https://pustakawan-26664-default-rtdb.firebaseio.com"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
+            authDomain: "pustakawan-26664.firebaseapp.com",
+            projectId: "pustakawan-26664",
+            storageBucket: "pustakawan-26664.appspot.com",
+            messagingSenderId: "284579513964",
+            appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get("id");
 
-    const linkIDs = [
-      "linkProfil",
-      "linkBeranda",
-      "linkPenugasan",
-      "linkCatatan",
-      "linkChat",
-      "linkChatUmum",
-      "linkRapat",
-      "linkDaftarPustakawan"
-    ];
-    linkIDs.forEach(lid => {
-      const el = document.getElementById(lid);
-      if (el && userId) el.href += userId;
-    });
+        if (!userId) {
+            document.body.innerHTML = "<main style='padding:64px 24px;font-size:18px;'>Akses ditolak. Mohon login.</main>";
+            throw new Error("Akses ditolak");
+        }
 
-    function toggleSidebar() {
-      document.getElementById("sidebar").classList.toggle("show");
-    }
+        const namaHeader = document.getElementById("fnamaHeader");
+        const jabatanHeader = document.getElementById("fjabatanHeader");
+        const daftarRapat = document.getElementById("daftarRapat");
 
-    function toggleForm() {
-      const form = document.getElementById("formRapat");
-      const button = document.querySelector("header button");
-      const isOpen = form.style.display === "block";
-      form.style.display = isOpen ? "none" : "block";
-      button.textContent = isOpen ? "+" : "×";
-    }
-
-    function buatRapat() {
-      const judul = document.getElementById("judul").value.trim();
-      if (!judul || !userId || judul.length < 3) {
-        alert("Judul minimal 3 karakter dan pengguna harus valid.");
-        return;
-      }
-
-      const refNama = db.ref("pustakawan/" + userId + "/nama");
-      refNama.once("value").then((snap) => {
-        const namaPembuat = snap.exists() ? snap.val() : userId;
-        const idRapat = Date.now();
-
-        db.ref("rapat/" + idRapat).set({
-          judul,
-          pembuat: userId,
-          nama: namaPembuat,
-          waktu: Date.now()
-        }).then(() => {
-          document.getElementById("judul").value = "";
-          document.getElementById("formRapat").style.display = "none";
-          document.querySelector("header button").textContent = "+";
+        const linkIDs = ["linkBeranda", "linkCatatan", "linkRapat", "linkProfil"];
+        linkIDs.forEach(lid => {
+            const el = document.getElementById(lid);
+            if (el && userId) {
+                const url = new URL(el.getAttribute("href"), location.href);
+                url.searchParams.set("id", userId);
+                el.setAttribute("href", url.toString());
+            }
         });
-      }).catch(err => {
-        alert("Gagal mengambil nama pengguna: " + err.message);
-      });
-    }
 
-    function tampilkanRapat() {
-      db.ref("rapat").orderByChild("waktu").on("value", (snap) => {
-        const container = document.getElementById("daftarRapat");
-        container.innerHTML = "";
-        snap.forEach((child) => {
-          const data = child.val();
-          const id = child.key;
-          const div = document.createElement("div");
-          div.className = "rapat";
-          const date = new Date(data.waktu).toLocaleString("id-ID");
-          div.innerHTML = `
-            <div class="rapat-title">${data.judul}</div>
-            <div class="rapat-pembuat">📌 Dibuat oleh: ${data.nama || data.pembuat}</div>
-            <div class="rapat-waktu">🕒 ${date}</div>
-            <div class="rapat-buttons">
-              <button class="masuk" onclick="masukRapat('${id}', '${data.pembuat}')">Masuk</button>
-              ${userId === data.pembuat ? `<button class="hapus" onclick="hapusRapat('${id}')">Hapus</button>` : ""}
-            </div>
-          `;
-          container.appendChild(div);
-        });
-      });
-    }
-
-    function masukRapat(idRapat, pembuat) {
-      const target = (userId === pembuat) ? "pimpinanrapat.html" : "pesertarapat.html";
-      window.location.href = `${target}?id=${userId}&rapat=${idRapat}`;
-    }
-
-    function hapusRapat(id) {
-      if (confirm("Yakin ingin menghapus rapat ini?")) {
-        db.ref("rapat/" + id).remove();
-      }
-    }
-
-    if (userId) tampilkanRapat();
-    else alert("ID pengguna tidak ditemukan.");
-  </script>
+        async function muatProfil() {
+            const snap = await get(ref(db, `pustakawan/${userId}`));
+            if (snap.exists()) {
+                const data = snap.val();
+                namaHeader.textContent = data.nama || "Rapat";
+                jabatanHeader.textContent = data.jabatan || "";
+            }
+        }
+        
+        function tampilkanRapat() {
+            onValue(ref(db, "rapat"), (snapshot) => {
+                daftarRapat.innerHTML = "";
+                const rapatData = [];
+                snapshot.forEach((child) => {
+                    const data = child.val();
+                    rapatData.push({ id: child.key, ...data });
+                });
+                
+                rapatData.sort((a, b) => b.waktu - a.waktu);
+                
+                rapatData.forEach((data) => {
+                    const div = document.createElement("div");
+                    div.className = "rapat";
+                    div.innerHTML = `
+                        <div class="rapat-title">${data.judul}</div>
+                        <div class="rapat-buttons">
+                            <button onclick="masukRapat('${data.id}', '${data.pembuat}')">
+                                <i class="material-icons">input</i> Masuk
+                            </button>
+                        </div>
+                    `;
+                    daftarRapat.appendChild(div);
+                });
+            });
+        }
+        
+        window.masukRapat = function(idRapat, pembuat) {
+            // Perubahan di sini:
+            // Tidak ada lagi pengecekan pembuat rapat, semua pengguna diarahkan ke ruangrapat.html
+            window.location.href = `ruangrapat.html?id=${userId}&rapat=${idRapat}`;
+        }
+        
+        muatProfil();
+        tampilkanRapat();
+    </script>
 </body>
 </html>
