@@ -38,7 +38,6 @@
     header h1 {
       font-size: 18px;
       margin: 0;
-      /* Perubahan: Mengubah tata letak untuk memindahkan judul ke kiri */
       margin-left: 16px;
     }
     
@@ -67,19 +66,31 @@
 
     /* Gelembung Pesan (Chat Bubbles) */
     .bubble {
-      background: #FFFFFF;
       padding: 8px 12px 6px 12px;
       border-radius: 8px;
       max-width: 80%;
       word-wrap: break-word;
-      align-self: flex-start;
       margin-bottom: 12px;
       position: relative;
+      animation: fadeIn 0.3s ease-in-out;
+      width: fit-content; /* Perbaikan utama */
+      min-width: 50px; /* Minimal lebar agar tidak terlalu kecil */
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Gelembung pesan orang lain */
+    .bubble.other {
+      background: #FFFFFF;
+      align-self: flex-start;
       margin-right: auto;
     }
-
+    
+    .bubble.other .meta {
+      color: #064039;
+    }
+    
     /* Membuat "ekor" pada gelembung pesan orang lain */
-    .bubble::before {
+    .bubble.other::before {
       content: '';
       position: absolute;
       top: 0;
@@ -89,22 +100,30 @@
       border-bottom: 8px solid transparent;
     }
 
+    /* Gelembung pesan saya */
     .bubble.mine {
       align-self: flex-end;
       background: #C9E7EA;
-      border-radius: 8px;
       margin-left: auto;
-      margin-right: 0;
-    }
-    
-    /* Menghilangkan ekor pada gelembung pesan saya */
-    .bubble.mine::before {
-      display: none;
     }
 
+    .bubble.mine .meta {
+        display: none;
+    }
+    
+    /* Membuat "ekor" pada gelembung pesan saya */
+    .bubble.mine::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -10px;
+      border-top: 8px solid transparent;
+      border-left: 12px solid #C9E7EA;
+      border-bottom: 8px solid transparent;
+    }
+    
     .bubble .meta {
       font-size: 10px;
-      color: #064039;
       margin-bottom: 4px;
       font-weight: bold;
     }
@@ -285,6 +304,8 @@
       div.dataset.id = key;
       if (data.id === userId) {
         div.classList.add("mine");
+      } else {
+        div.classList.add("other");
       }
 
       const meta = document.createElement("div");
