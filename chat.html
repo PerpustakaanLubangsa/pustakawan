@@ -133,7 +133,7 @@
   <header>
     <a href="javascript:history.back()" class="back-btn"><i class="material-icons">arrow_back</i></a>
     <h1 id="fnamaHeader">Memuat...</h1>
-    <a href="profil2.html" class="profile-icon"><i class="material-icons">account_circle</i></a>
+    <a href="#" id="profileLink" class="profile-icon"><i class="material-icons">account_circle</i></a>
   </header>
 
   <main>
@@ -175,6 +175,7 @@
     const pesanInput = document.getElementById("pesanInput");
     const namaHeader = document.getElementById("fnamaHeader");
     const mainElement = document.querySelector('main');
+    const profileLink = document.getElementById("profileLink"); // Ambil elemen link profil
     
     let nama = "Anonim";
     let chatRef = null;
@@ -205,6 +206,9 @@
             formKirim.style.display = "none";
             return;
         }
+        
+        // Perbaikan: Atur href link profil dengan ID tujuan
+        profileLink.href = `profil2.html?profilId=${tujuan}`;
 
         const namaTujuan = await getNamaPustakawan(tujuan);
         namaHeader.textContent = namaTujuan;
