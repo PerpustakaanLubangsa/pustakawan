@@ -1,178 +1,230 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Profil Pustakawan</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      background: #121212;
-      color: white;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Profil</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        /* Gaya Dasar */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-    header {
-      display: flex;
-      align-items: center;
-      height: 64px;
-      padding: 0 16px;
-      background: #1e1e1e;
-      border-bottom: 1px solid #333;
-      position: fixed;
-      top: 0;
-      width: 100%;
-      z-index: 1000;
-    }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background: #f0f2f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding-top: 52px;
+        }
 
-    .back-btn {
-      background: linear-gradient(135deg, #fdd835, #fbc02d);
-      color: #121212;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      transition: background 0.2s ease;
-    }
+        /* Header yang Tetap di Atas */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            width: 100%;
+            height: 52px;
+            background: #006778;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 1px solid #333;
+        }
 
-    .back-btn:hover {
-      background: linear-gradient(135deg, #fff176, #fbc02d);
-    }
+        header .back-btn {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            transition: transform 0.2s;
+        }
 
-    main {
-      padding: 88px 24px 24px;
-      max-width: 600px;
-      margin: 0 auto;
-    }
+        header .back-btn:active {
+            transform: scale(0.9);
+        }
 
-    .info {
-      margin-bottom: 16px;
-    }
+        header h1 {
+            font-size: 18px;
+            margin: 0;
+            margin-left: 16px;
+            color: white;
+        }
 
-    .info label {
-      display: block;
-      font-size: 14px;
-      margin-bottom: 4px;
-      text-align: left;
-    }
+        /* Konten Utama */
+        main {
+            flex: 1;
+            padding: 16px 24px;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
 
-    .info input {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      background: #2a2a2a;
-      color: #ccc;
-      border: 1px solid #444;
-      border-radius: 6px;
-    }
+        .profile-container {
+            background: #ffffff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            text-align: center;
+        }
 
-    input:read-only {
-      background: #2a2a2a;
-      color: #ccc;
-      border-color: #333;
-    }
+        .profile-icon {
+            font-size: 80px;
+            color: #00ACC1;
+            margin-bottom: 16px;
+        }
 
-    #notif {
-      text-align: center;
-      margin-top: 16px;
-      font-size: 14px;
-      color: #fdd835;
-    }
-  </style>
+        h2.profile-name {
+            font-size: 24px;
+            margin: 0 0 8px 0;
+            color: #333;
+        }
+
+        .profile-jabatan {
+            font-size: 16px;
+            color: #777;
+            margin-bottom: 24px;
+        }
+
+        .info-group {
+            text-align: left;
+            margin-top: 24px;
+        }
+
+        .info-item {
+            margin-bottom: 16px;
+        }
+
+        .info-item .label {
+            font-weight: bold;
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .info-item .value {
+            padding: 10px 16px;
+            background: #f8f8f8;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+            display: block;
+            word-wrap: break-word;
+        }
+        
+        .loading {
+            text-align: center;
+            padding-top: 50px;
+            color: #aaa;
+        }
+    </style>
 </head>
 <body>
 
-  <header>
-    <button class="back-btn" onclick="history.back()">← Kembali</button>
-  </header>
+    <header>
+        <a href="javascript:history.back()" class="back-btn"><i class="material-icons">arrow_back</i></a>
+        <h1>Profil</h1>
+    </header>
 
-  <main>
-    <div id="profilBox">
-      <div class="info"><label>Nama</label><input id="fnama" readonly /></div>
-      <div class="info"><label>Anggota Sejak</label><input id="fsejak" readonly /></div>
-      <div class="info"><label>Jabatan</label><input id="fjabatan" readonly /></div>
-      <div class="info"><label>Nomor Telepon</label><input id="ftelepon" readonly /></div>
-      <div class="info"><label>Email</label><input id="femail" readonly /></div>
-      <div class="info"><label>Alamat</label><input id="falamat" readonly /></div>
-      <div class="info"><label>Tempat Tanggal Lahir</label><input id="fttl" readonly /></div>
-      <div class="info"><label>Instagram</label><input id="fig" readonly /></div>
-      <div class="info"><label>Facebook</label><input id="ffb" readonly /></div>
-      <div class="info"><label>TikTok</label><input id="ftiktok" readonly /></div>
-      <div id="notif"></div>
-    </div>
-  </main>
+    <main>
+        <div id="profilContainer">
+            <div class="loading">Memuat profil...</div>
+        </div>
+    </main>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
-      authDomain: "pustakawan-26664.firebaseapp.com",
-      projectId: "pustakawan-26664",
-      storageBucket: "pustakawan-26664.appspot.com",
-      messagingSenderId: "284579513964",
-      appId: "1:284579513964:web:b45f73ac287e1f49eeba49",
-      databaseURL: "https://pustakawan-26664-default-rtdb.firebaseio.com"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
+            authDomain: "pustakawan-26664.firebaseapp.com",
+            projectId: "pustakawan-26664",
+            storageBucket: "pustakawan-26664.appspot.com",
+            messagingSenderId: "284579513964",
+            appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+        const urlParams = new URLSearchParams(window.location.search);
+        const profilId = urlParams.get("profilId");
+        const profilContainer = document.getElementById("profilContainer");
 
-    const urlParams = new URLSearchParams(location.search);
-    const id = urlParams.get("id");
+        if (!profilId) {
+            profilContainer.innerHTML = "<div class='profile-container' style='text-align:center;'>ID profil tidak ditemukan.</div>";
+            throw new Error("ID profil tidak ditemukan.");
+        }
 
-    const refs = {
-      fnama: document.getElementById("fnama"),
-      fsejak: document.getElementById("fsejak"),
-      fjabatan: document.getElementById("fjabatan"),
-      ftelepon: document.getElementById("ftelepon"),
-      femail: document.getElementById("femail"), // tambahkan email di sini
-      falamat: document.getElementById("falamat"),
-      fttl: document.getElementById("fttl"),
-      fig: document.getElementById("fig"),
-      ffb: document.getElementById("ffb"),
-      ftiktok: document.getElementById("ftiktok"),
-    };
+        async function muatProfil() {
+            try {
+                const snapshot = await get(ref(db, `pustakawan/${profilId}`));
+                const loadingDiv = document.querySelector('.loading');
+                if (loadingDiv) loadingDiv.remove();
 
-    const notif = document.getElementById("notif");
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const tanggalGabung = new Date(data.sejak || Date.now()).toLocaleDateString('id-ID', {
+                      year: 'numeric', month: 'long', day: 'numeric'
+                    });
 
-    function tampilNotif(teks, warna = "#fdd835") {
-      notif.textContent = teks;
-      notif.style.color = warna;
-    }
+                    let infoHtml = `
+                        <h2 class="profile-name">${data.nama || 'Nama Tidak Diketahui'}</h2>
+                        <div class="profile-jabatan">${data.jabatan || 'Jabatan Tidak Diketahui'}</div>
 
-    async function muatProfil() {
-      if (!id) {
-        tampilNotif("ID tidak ditemukan di URL.", "red");
-        return;
-      }
+                        <div class="info-group">
+                            <div class="info-item">
+                                <span class="label">Anggota sejak</span>
+                                <span class="value">${tanggalGabung}</span>
+                            </div>
+                    `;
 
-      const refData = ref(db, `pustakawan/${id}`);
-      const snap = await get(refData);
+                    // Mengambil dan mengurutkan keterangan tambahan
+                    if (data.keteranganTambahan) {
+                        const sortedKeterangan = Object.values(data.keteranganTambahan).sort((a, b) => (a.order || 9999) - (b.order || 9999));
+                        sortedKeterangan.forEach(keterangan => {
+                            // Hanya tambahkan jika judul dan isi ada
+                            if (keterangan.title && keterangan.value) {
+                                infoHtml += `
+                                    <div class="info-item">
+                                        <span class="label">${keterangan.title}</span>
+                                        <span class="value">${keterangan.value}</span>
+                                    </div>
+                                `;
+                            }
+                        });
+                    }
 
-      if (snap.exists()) {
-        const data = snap.val();
-        refs.fnama.value = data.nama || "";
-        refs.fsejak.value = new Date(data.sejak || Date.now()).toLocaleDateString("id-ID");
-        refs.fjabatan.value = data.jabatan || "";
-        refs.ftelepon.value = data.telepon || "";
-        refs.femail.value = data.email || ""; // ambil data email dari Firebase
-        refs.falamat.value = data.alamat || "";
-        refs.fttl.value = data.ttl || "";
-        refs.fig.value = data.ig || "";
-        refs.ffb.value = data.fb || "";
-        refs.ftiktok.value = data.tiktok || "";
-      } else {
-        tampilNotif("Profil tidak ditemukan", "red");
-      }
-    }
+                    infoHtml += `</div>`;
 
-    muatProfil();
-  </script>
+                    profilContainer.innerHTML = `
+                        <div class="profile-container">
+                            <i class="material-icons profile-icon">account_circle</i>
+                            ${infoHtml}
+                        </div>
+                    `;
+                    document.title = `Profil - ${data.nama || 'Pustakawan'}`;
+                } else {
+                    profilContainer.innerHTML = "<div class='profile-container' style='text-align:center;'>Profil tidak ditemukan.</div>";
+                }
+            } catch (error) {
+                console.error("Gagal memuat data profil:", error);
+                profilContainer.innerHTML = "<div class='profile-container' style='text-align:center;'>Terjadi kesalahan saat memuat data.</div>";
+            }
+        }
+
+        muatProfil();
+    </script>
 </body>
 </html>
