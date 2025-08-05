@@ -43,17 +43,15 @@
     document.addEventListener('DOMContentLoaded', () => {
         const logo = document.querySelector('#splash-screen .logo');
 
-        // Tampilkan logo dengan animasi setelah halaman selesai di-load
-        // setTimeout 100ms digunakan untuk memastikan browser siap menjalankan animasi
+        const params = new URLSearchParams(window.location.search);
+        const idParam = params.get('id');
+        const tujuanUrl = idParam ? `beranda.html?id=${idParam}` : 'beranda.html';
+
         setTimeout(() => {
             logo.classList.add('show');
-
-            // Atur waktu jeda 2 detik setelah animasi muncul
             setTimeout(() => {
-                // Alihkan ke beranda.html
-                window.location.href = "beranda.html";
+                window.location.href = tujuanUrl;
             }, 2000);
-
         }, 100);
     });
 </script>
