@@ -1,341 +1,337 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Catatan Pribadi</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      background: #121212;
-      color: white;
-      display: flex;
-    }
-
-    header {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      height: 64px;
-      background: #1e1e1e;
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-      border-bottom: 1px solid #333;
-      z-index: 1001;
-    }
-
-    header img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      margin-right: 12px;
-      cursor: pointer;
-    }
-
-    header h1 {
-      font-size: 18px;
-      margin: 0;
-    }
-
-    header small {
-      font-size: 12px;
-      color: #ccc;
-    }
-
-    aside {
-      position: fixed;
-      top: 64px;
-      left: 0;
-      width: 240px;
-      height: calc(100vh - 64px);
-      background: #1f1f1f;
-      padding: 24px 16px;
-      overflow-y: auto;
-      z-index: 1002;
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
-    }
-
-    aside.show {
-      transform: translateX(0);
-    }
-
-    @media (min-width: 768px) {
-      aside {
-        transform: none !important;
-      }
-    }
-
-    aside h2 {
-      font-size: 18px;
-      margin-top: 0;
-      margin-bottom: 24px;
-    }
-
-    aside a {
-       display: block;
-  color: #ccc;
-  text-decoration: none;
-  padding: 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  margin-bottom: 8px;
-  background: #2a2a2a;
-  transition: background 0.2s;
-}
-    aside a:hover {
-      background: #2a2a2a;
-      color: white;
-    }
-
-    main {
-      flex: 1;
-      padding: 88px 24px 24px;
-      width: 100%;
-    }
-
-    @media (min-width: 768px) {
-      main {
-        margin-left: 240px;
-      }
-    }
-
-    #formArea {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 24px;
-    }
-
-    #inputCatatan {
-      width: 100%;
-      height: 40px;
-      font-size: 16px;
-      padding: 0 12px;
-      background: #2a2a2a;
-      color: white;
-      border: 1px solid #444;
-      border-radius: 20px;
-    }
-
-    #formArea button {
-      align-self: flex-end;
-      width: 40px;
-      height: 40px;
-      font-size: 24px;
-      border: none;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.1);
-      color: white;
-      cursor: pointer;
-    }
-
-    #peringatan {
-      color: #fdd835;
-      font-size: 14px;
-      margin-bottom: 16px;
-    }
-
-    .item {
-      background: #1e1e1e;
-      border: 1px solid #333;
-      border-radius: 6px;
-      padding: 12px;
-      margin-bottom: 16px;
-      position: relative;
-    }
-
-    .item button {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(255,255,255,0.1);
-      border: none;
-      color: white;
-      font-size: 14px;
-      padding: 4px 8px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    #overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.5);
-      z-index: 1000;
-    }
-
-    #overlay.show {
-      display: block;
-    }
-
-    @media (min-width: 768px) {
-      #overlay {
-        display: none !important;
-      }
-    }
-  </style>
-</head>
-<body>
-
-  <div id="overlay" onclick="tutupSidebar()"></div>
-
-  <header>
-    <img src="1.png" alt="Foto" onclick="toggleSidebar()" />
-    <div style="flex-grow: 1;">
-      <h1 id="fnamaHeader">Catatan</h1>
-      <small id="fjabatanHeader"></small>
-    </div>
-  </header>
-
-    <aside id="sidebar">
-    <h2>📚 Menu</h2>
-    <a href="profil.html?id=" id="linkProfil">👤 Profil</a>
-    <a href="beranda.html?id=" id="linkBeranda">🏠 Beranda</a>
-    <a href="penugasan.html?id=" id="linkPenugasan">📄 Penugasan</a>
-    <a href="catatan.html?id=" id="linkCatatan">📔 Catatan</a>
-    <a href="chat.html?id=" id="linkChat">💬 Chat</a>
-    <a href="chat-umum.html?id=" id="linkChatUmum">💬 Chat Umum</a>
-    <a href="rapat.html?id=" id="linkRapat">📅 Rapat</a>
-    <a href="daftarpustakawan.html?id=" id="linkDaftarPustakawan">👤 Daftar Pustakawan</a>
-  </aside>
-  
-  <main>
-    <div id="peringatan"></div>
-
-    <div id="formArea">
-      <input id="inputCatatan" placeholder="Tulis catatan pribadi..." />
-      <button onclick="tambahCatatan()">+</button>
-    </div>
-
-    <div id="daftarCatatan">Memuat catatan...</div>
-  </main>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import {
-      getDatabase, ref, get, push, set, remove
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
-      authDomain: "pustakawan-26664.firebaseapp.com",
-      projectId: "pustakawan-26664",
-      storageBucket: "pustakawan-26664.appspot.com",
-      messagingSenderId: "284579513964",
-      appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const urlParams = new URLSearchParams(location.search);
-    const id = urlParams.get("id");
-
-    if (!id) {
-      document.body.innerHTML = "<main style='padding:64px 24px;font-size:18px;'>Halaman ini hanya dapat diakses oleh pustakawan.</main>";
-      throw new Error("Akses ditolak");
-    }
-
-    const namaHeader = document.getElementById("fnamaHeader");
-    const jabatanHeader = document.getElementById("fjabatanHeader");
-    const daftarCatatan = document.getElementById("daftarCatatan");
-    const peringatan = document.getElementById("peringatan");
-
-     const linkIDs = [
-      "linkProfil",
-      "linkBeranda",
-      "linkPenugasan",
-      "linkCatatan",
-      "linkChat",
-      "linkChatUmum",
-      "linkRapat",
-      "linkDaftarPustakawan"
-    ];
-    linkIDs.forEach(lid => {
-      const el = document.getElementById(lid);
-      if (el && id) el.href += id;
-    });
-
-    async function muatProfil() {
-      const snap = await get(ref(db, `pustakawan/${id}`));
-      if (snap.exists()) {
-        const data = snap.val();
-        namaHeader.textContent = data.nama || "Catatan";
-        jabatanHeader.textContent = data.jabatan || "";
-      }
-    }
-
-    async function tampilCatatan() {
-      const refCatatan = ref(db, `catatan/${id}`);
-      const snap = await get(refCatatan);
-      daftarCatatan.innerHTML = "";
-      if (snap.exists()) {
-        const data = Object.entries(snap.val());
-        if (data.length >= 20) {
-          peringatan.textContent = "Batas maksimal 20 catatan. Hapus salah satu untuk menambah baru.";
-        } else {
-          peringatan.textContent = "";
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Catatan Pribadi</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        /* Gaya Dasar */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        data.reverse().forEach(([key, val]) => {
-          const div = document.createElement("div");
-          div.className = "item";
-          div.innerHTML = `
-            <p>${val}</p>
-            <button onclick="hapusCatatan('${key}')">Hapus</button>
-          `;
-          daftarCatatan.appendChild(div);
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background: #f0f2f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding-top: 52px;
+            padding-bottom: 72px; 
+        }
+
+        /* Header yang Tetap di Atas */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            width: 100%;
+            height: auto;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 8px 24px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        header h1 {
+            font-size: 18px;
+            margin: 0;
+            color: #00ACC1;
+        }
+        
+        header small {
+            font-size: 12px;
+            color: #777;
+            margin-top: 2px;
+        }
+
+        /* Konten Utama */
+        main {
+            flex: 1;
+            padding: 16px 24px;
+            width: 100%;
+        }
+
+        /* Area Input Catatan */
+        #formArea {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        #inputCatatan {
+            flex-grow: 1;
+            height: 48px;
+            font-size: 16px;
+            padding: 0 16px;
+            background: #ffffff;
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 24px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        #inputCatatan::placeholder {
+            color: #aaa;
+        }
+        
+        #inputCatatan:focus {
+            border-color: #00ACC1;
+        }
+
+        #tambahCatatanBtn {
+            width: 48px;
+            height: 48px;
+            font-size: 24px;
+            border: none;
+            border-radius: 50%;
+            background: #00ACC1;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform 0.2s;
+        }
+        
+        #tambahCatatanBtn:active {
+            transform: scale(0.9);
+        }
+
+        #peringatan {
+            color: #f44336;
+            font-size: 14px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        /* Daftar Catatan */
+        .item {
+            background: #ffffff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .item p {
+            margin: 0;
+            font-size: 15px;
+            line-height: 1.5;
+            padding-right: 40px; /* beri ruang untuk tombol hapus */
+        }
+        
+        .item .hapus-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: transparent;
+            border: none;
+            color: #999;
+            font-size: 20px;
+            padding: 4px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .item .hapus-btn:hover {
+            color: #f44336;
+        }
+        
+        /* Navigasi Bawah yang Tetap */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 60px;
+            background: #ffffff;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            height: 100%;
+            text-decoration: none;
+            color: #888;
+            transition: color 0.2s;
+        }
+
+        .bottom-nav .nav-item.active {
+            color: #00ACC1;
+        }
+
+        .bottom-nav .nav-item:hover {
+            color: #00ACC1;
+        }
+
+        .bottom-nav .nav-item .material-icons {
+            font-size: 24px;
+            margin-bottom: 2px;
+        }
+        
+        .bottom-nav .nav-item span {
+            font-size: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 id="fnamaHeader">Catatan</h1>
+        <small id="fjabatanHeader"></small>
+    </header>
+
+    <main>
+        <div id="peringatan"></div>
+        <div id="formArea">
+            <input id="inputCatatan" placeholder="Tulis catatan pribadi..." />
+            <button id="tambahCatatanBtn" onclick="tambahCatatan()"><i class="material-icons">add</i></button>
+        </div>
+        <div id="daftarCatatan">Memuat catatan...</div>
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="beranda.html?id=" id="linkBeranda" class="nav-item">
+            <i class="material-icons">home</i>
+            <span>Beranda</span>
+        </a>
+        <a href="catatan.html?id=" id="linkCatatan" class="nav-item active">
+            <i class="material-icons">note</i>
+            <span>Catatan</span>
+        </a>
+        <a href="rapat.html?id=" id="linkRapat" class="nav-item">
+            <i class="material-icons">event</i>
+            <span>Rapat</span>
+        </a>
+        <a href="profil.html?id=" id="linkProfil" class="nav-item">
+            <i class="material-icons">person</i>
+            <span>Profil</span>
+        </a>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import {
+            getDatabase, ref, get, push, set, remove, onValue
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
+            authDomain: "pustakawan-26664.firebaseapp.com",
+            projectId: "pustakawan-26664",
+            storageBucket: "pustakawan-26664.appspot.com",
+            messagingSenderId: "284579513964",
+            appId: "1:284579513964:web:b45f73ac287e1f49eeba49"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const urlParams = new URLSearchParams(location.search);
+        const id = urlParams.get("id");
+
+        if (!id) {
+            document.body.innerHTML = "<main style='padding:64px 24px;font-size:18px;'>Halaman ini hanya dapat diakses oleh pustakawan.</main>";
+            throw new Error("Akses ditolak");
+        }
+
+        const namaHeader = document.getElementById("fnamaHeader");
+        const jabatanHeader = document.getElementById("fjabatanHeader");
+        const daftarCatatan = document.getElementById("daftarCatatan");
+        const peringatan = document.getElementById("peringatan");
+
+        const linkIDs = ["linkBeranda", "linkCatatan", "linkRapat", "linkProfil"];
+        linkIDs.forEach(lid => {
+            const el = document.getElementById(lid);
+            if (el && id) {
+                const url = new URL(el.getAttribute("href"), location.href);
+                url.searchParams.set("id", id);
+                el.setAttribute("href", url.toString());
+            }
         });
-      } else {
-        daftarCatatan.innerHTML = "<p>Belum ada catatan.</p>";
-      }
-    }
 
-    window.tambahCatatan = async function () {
-      const input = document.getElementById("inputCatatan");
-      const teks = input.value.trim();
-      if (!teks) return alert("Catatan kosong.");
+        async function muatProfil() {
+            const snap = await get(ref(db, `pustakawan/${id}`));
+            if (snap.exists()) {
+                const data = snap.val();
+                namaHeader.textContent = data.nama || "Catatan";
+                jabatanHeader.textContent = data.jabatan || "";
+            }
+        }
+        
+        function tampilCatatan() {
+            const refCatatan = ref(db, `catatan/${id}`);
+            onValue(refCatatan, (snap) => {
+                daftarCatatan.innerHTML = "";
+                if (snap.exists()) {
+                    const data = Object.entries(snap.val());
+                    if (data.length >= 20) {
+                        peringatan.textContent = "Batas maksimal 20 catatan. Hapus salah satu untuk menambah baru.";
+                    } else {
+                        peringatan.textContent = "";
+                    }
 
-      const refCatatan = ref(db, `catatan/${id}`);
-      const snap = await get(refCatatan);
-      const data = snap.exists() ? Object.entries(snap.val()) : [];
+                    data.reverse().forEach(([key, val]) => {
+                        const div = document.createElement("div");
+                        div.className = "item";
+                        div.innerHTML = `
+                            <p>${val}</p>
+                            <button class="hapus-btn" onclick="hapusCatatan('${key}')"><i class="material-icons">delete</i></button>
+                        `;
+                        daftarCatatan.appendChild(div);
+                    });
+                } else {
+                    daftarCatatan.innerHTML = "<p>Belum ada catatan.</p>";
+                }
+            });
+        }
 
-      if (data.length >= 20) {
-        alert("Sudah mencapai 20 catatan. Hapus salah satu dulu.");
-        return;
-      }
+        window.tambahCatatan = async function () {
+            const input = document.getElementById("inputCatatan");
+            const teks = input.value.trim();
+            if (!teks) return;
 
-      await set(push(refCatatan), teks);
-      input.value = "";
-      tampilCatatan();
-    };
+            const refCatatan = ref(db, `catatan/${id}`);
+            const snap = await get(refCatatan);
+            const data = snap.exists() ? Object.entries(snap.val()) : [];
 
-    window.hapusCatatan = async function (key) {
-      await remove(ref(db, `catatan/${id}/${key}`));
-      tampilCatatan();
-    };
+            if (data.length >= 20) {
+                alert("Sudah mencapai 20 catatan. Hapus salah satu dulu.");
+                return;
+            }
 
-    muatProfil();
-    tampilCatatan();
+            await set(push(refCatatan), teks);
+            input.value = "";
+        };
 
-    window.toggleSidebar = () => {
-      const sidebar = document.getElementById("sidebar");
-      const overlay = document.getElementById("overlay");
-      const show = !sidebar.classList.contains("show");
-      sidebar.classList.toggle("show", show);
-      overlay.classList.toggle("show", show);
-    };
+        window.hapusCatatan = async function (key) {
+            await remove(ref(db, `catatan/${id}/${key}`));
+        };
 
-    window.tutupSidebar = () => {
-      document.getElementById("sidebar").classList.remove("show");
-      document.getElementById("overlay").classList.remove("show");
-    };
-  </script>
+        muatProfil();
+        tampilCatatan();
+    </script>
 </body>
 </html>
