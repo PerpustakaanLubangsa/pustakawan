@@ -21,27 +21,40 @@
 
         /* CSS untuk logo di tengah */
         #splash-screen .logo {
-            max-width: 150px;
+            max-width: 150px; /* Sesuaikan ukuran maksimal logo jika perlu */
             height: auto;
+            opacity: 0; /* Logo awalnya tidak terlihat */
+            transition: opacity 0.8s ease-in-out; /* Animasi fade-in */
         }
 
-        /* Konten utama tidak diperlukan karena akan di-redirect */
+        /* Kelas untuk menampilkan logo dengan animasi */
+        #splash-screen .logo.show {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
 
 <div id="splash-screen">
-    <img src="https://via.placeholder.com/150" alt="Logo Perusahaan" class="logo">
+    <img src="logo.png" alt="Logo Perusahaan" class="logo">
 </div>
 
 <script>
-    // JavaScript untuk mengatur waktu jeda dan pengalihan halaman
     document.addEventListener('DOMContentLoaded', () => {
-        // Atur waktu jeda selama 2000 milidetik (2 detik)
+        const logo = document.querySelector('#splash-screen .logo');
+
+        // Tampilkan logo dengan animasi setelah halaman selesai di-load
+        // setTimeout 100ms digunakan untuk memastikan browser siap menjalankan animasi
         setTimeout(() => {
-            // Setelah 2 detik, langsung alihkan pengguna ke beranda.html
-            window.location.href = "beranda.html"; 
-        }, 2000); // Waktu jeda 2 detik
+            logo.classList.add('show');
+
+            // Atur waktu jeda 2 detik setelah animasi muncul
+            setTimeout(() => {
+                // Alihkan ke beranda.html
+                window.location.href = "beranda.html";
+            }, 2000);
+
+        }, 100);
     });
 </script>
 
