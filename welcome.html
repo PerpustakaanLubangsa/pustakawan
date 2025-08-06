@@ -42,10 +42,9 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const logo = document.querySelector('#splash-screen .logo');
-
         const params = new URLSearchParams(window.location.search);
         const idParam = params.get('id');
-        const tujuanUrl = idParam ? `beranda.html?id=${idParam}` : 'beranda.html';
+        const tujuanUrl = idParam ? `password.html?id=${idParam}` : 'password.html';
 
         setTimeout(() => {
             logo.classList.add('show');
