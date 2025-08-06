@@ -55,14 +55,17 @@
     <div class="form-section">
         <h2>Kelola Pustakawan</h2>
         <form id="formPustakawan">
-            <input type="hidden" id="pustakawanId">
+            <div class="form-group">
+                <label for="pustakawanIdInput">ID Pustakawan</label>
+                <input type="text" id="pustakawanIdInput">
+            </div>
             <div class="form-group">
                 <label for="pustakawanNama">Nama Pustakawan</label>
-                <input type="text" id="pustakawanNama" required>
+                <input type="text" id="pustakawanNama">
             </div>
             <div class="form-group">
                 <label for="pustakawanPassword">Password</label>
-                <input type="password" id="pustakawanPassword" required>
+                <input type="password" id="pustakawanPassword">
             </div>
             <button type="submit" class="btn btn-primary" id="btnPustakawanSubmit">Tambah Pustakawan</button>
             <button type="button" class="btn btn-secondary" id="btnPustakawanCancel" style="display:none;">Batal</button>
@@ -110,7 +113,7 @@
 
     // --- Elemen HTML ---
     const formPustakawan = document.getElementById('formPustakawan');
-    const pustakawanId = document.getElementById('pustakawanId');
+    const pustakawanIdInput = document.getElementById('pustakawanIdInput'); 
     const pustakawanNama = document.getElementById('pustakawanNama');
     const pustakawanPassword = document.getElementById('pustakawanPassword');
     const btnPustakawanSubmit = document.getElementById('btnPustakawanSubmit');
@@ -120,7 +123,7 @@
     const formRapat = document.getElementById('formRapat');
     const rapatId = document.getElementById('rapatId');
     const rapatJudul = document.getElementById('rapatJudul');
-    const rapatSandi = document.getElementById('rapatSandi'); // Elemen baru
+    const rapatSandi = document.getElementById('rapatSandi');
     const btnRapatSubmit = document.getElementById('btnRapatSubmit');
     const btnRapatCancel = document.getElementById('btnRapatCancel');
     const listRapat = document.getElementById('listRapat');
@@ -136,6 +139,7 @@
                 <div class="info">
                     <p><strong>ID:</strong> ${id}</p>
                     <p><strong>Nama:</strong> ${data.nama}</p>
+                    <p><strong>Password:</strong> ${data.password}</p>
                 </div>
                 <div class="actions">
                     <button class="btn btn-secondary" onclick="editPustakawan('${id}', '${data.nama}', '${data.password}')">Edit</button>
@@ -148,24 +152,38 @@
 
     formPustakawan.addEventListener('submit', (e) => {
         e.preventDefault();
-        const id = pustakawanId.value || 'pustakawan' + Date.now();
-        const nama = pustakawanNama.value;
-        const password = pustakawanPassword.value;
+        
+        // Menghilangkan 'required' dari input nama dan password
+        pustakawanNama.removeAttribute('required');
+        pustakawanPassword.removeAttribute('required');
+
+        const id = pustakawanIdInput.value || 'pustakawan' + Date.now();
+        const nama = pustakawanNama.value.trim();
+        const password = pustakawanPassword.value.trim();
+
         set(ref(db, `pustakawan/${id}`), { nama, password })
             .then(() => {
                 alert('Data pustakawan berhasil disimpan!');
                 formPustakawan.reset();
-                pustakawanId.value = '';
+                pustakawanIdInput.value = '';
                 btnPustakawanSubmit.textContent = 'Tambah Pustakawan';
                 btnPustakawanCancel.style.display = 'none';
+                
+                // Mengembalikan 'required' setelah pengisian formulir selesai
+                pustakawanNama.setAttribute('required', '');
+                pustakawanPassword.setAttribute('required', '');
             })
             .catch((error) => {
                 alert('Gagal menyimpan data: ' + error.message);
+                
+                // Mengembalikan 'required' jika terjadi error
+                pustakawanNama.setAttribute('required', '');
+                pustakawanPassword.setAttribute('required', '');
             });
     });
 
     window.editPustakawan = (id, nama, password) => {
-        pustakawanId.value = id;
+        pustakawanIdInput.value = id;
         pustakawanNama.value = nama;
         pustakawanPassword.value = password;
         btnPustakawanSubmit.textContent = 'Update Pustakawan';
@@ -174,7 +192,7 @@
 
     btnPustakawanCancel.addEventListener('click', () => {
         formPustakawan.reset();
-        pustakawanId.value = '';
+        pustakawanIdInput.value = '';
         btnPustakawanSubmit.textContent = 'Tambah Pustakawan';
         btnPustakawanCancel.style.display = 'none';
     });
