@@ -66,7 +66,7 @@
             padding: 16px 24px;
             width: 100%;
         }
-
+        
         /* Daftar Rapat */
         .rapat {
             background: #ffffff;
@@ -80,8 +80,14 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .rapat-header {
+            display: flex;
             justify-content: space-between;
+            align-items: center;
             gap: 16px;
         }
 
@@ -91,7 +97,7 @@
             color: #00ACC1; 
             flex-grow: 1;
         }
-
+        
         .rapat-buttons {
             display: flex;
         }
@@ -116,6 +122,36 @@
         
         .rapat-buttons button .material-icons {
             font-size: 18px;
+        }
+
+        .rapat-details {
+            border-top: 1px solid #eee;
+            padding-top: 12px;
+        }
+
+        .rapat-details .count {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        
+        .rapat-details .count .material-icons {
+            font-size: 20px;
+            color: #00ACC1;
+        }
+
+        .rapat-details .names-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            font-size: 14px;
+            color: #777;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 4px 8px;
         }
         
         /* Navigasi Bawah yang Tetap */
@@ -242,8 +278,25 @@
             }
         }
         
+        // Fungsi untuk mengambil nama dari userIds
+        async function getNamaDariIds(userIds) {
+            if (!userIds || userIds.length === 0) return [];
+            const namaList = [];
+            const pustakawanRef = ref(db, 'pustakawan');
+            const snapshot = await get(pustakawanRef);
+            if (snapshot.exists()) {
+                const pustakawanData = snapshot.val();
+                for (const id of userIds) {
+                    if (pustakawanData[id]) {
+                        namaList.push(pustakawanData[id].nama);
+                    }
+                }
+            }
+            return namaList;
+        }
+
         function tampilkanRapat() {
-            onValue(ref(db, "rapat"), (snapshot) => {
+            onValue(ref(db, "rapat"), async (snapshot) => {
                 daftarRapat.innerHTML = "";
                 const rapatData = [];
                 snapshot.forEach((child) => {
@@ -253,25 +306,35 @@
                 
                 rapatData.sort((a, b) => b.waktu - a.waktu);
                 
-                rapatData.forEach((data) => {
+                for (const data of rapatData) {
+                    const hadirList = data.hadir ? Object.keys(data.hadir) : [];
+                    const namaPeserta = await getNamaDariIds(hadirList);
+                    const listNamaHTML = namaPeserta.map(nama => `<li>${nama}</li>`).join('');
+
                     const div = document.createElement("div");
                     div.className = "rapat";
                     div.innerHTML = `
-                        <div class="rapat-title">${data.judul}</div>
-                        <div class="rapat-buttons">
-                            <button onclick="masukRapat('${data.id}', '${data.pembuat}')">
-                                <i class="material-icons">input</i> Masuk
-                            </button>
+                        <div class="rapat-header">
+                            <div class="rapat-title">${data.judul}</div>
+                            <div class="rapat-buttons">
+                                <button onclick="masukRapat('${data.id}')">
+                                    <i class="material-icons">input</i> Masuk
+                                </button>
+                            </div>
+                        </div>
+                        <div class="rapat-details">
+                            <div class="count">
+                                <i class="material-icons">group</i> Hadir: ${namaPeserta.length} orang
+                            </div>
+                            <ul class="names-list">${listNamaHTML}</ul>
                         </div>
                     `;
                     daftarRapat.appendChild(div);
-                });
+                }
             });
         }
         
-        window.masukRapat = function(idRapat, pembuat) {
-            // Perubahan di sini:
-            // Tidak ada lagi pengecekan pembuat rapat, semua pengguna diarahkan ke ruangrapat.html
+        window.masukRapat = function(idRapat) {
             window.location.href = `ruangrapat.html?id=${userId}&rapat=${idRapat}`;
         }
         
