@@ -104,29 +104,105 @@
 
         /* Sidebar Catatan */
         #catatanSidebar {
-          position: fixed; top: 52px; right: -320px;
-          width: 300px; height: calc(100vh - 52px);
-          background-color: #fff; box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-          transition: right 0.3s ease-in-out;
-          display: flex; flex-direction: column;
-          z-index: 1000;
+            position: fixed; top: 52px; right: -320px;
+            width: 300px; height: calc(100vh - 52px);
+            background-color: #fff; box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            transition: right 0.3s ease-in-out;
+            display: flex; flex-direction: column;
+            z-index: 1000;
         }
         #catatanSidebar.show { right: 0; }
         #catatanSidebar .sidebar-header {
-          display: flex; justify-content: space-between; align-items: center;
-          padding: 1rem; border-bottom: 1px solid #eee;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem; border-bottom: 1px solid #eee;
         }
         #catatanSidebar .sidebar-header h3 { margin: 0; color: #00796B; }
         #catatanSidebar .sidebar-header .close-btn {
-          background: none; border: none; font-size: 24px;
-          cursor: pointer; color: #999;
+            background: none; border: none; font-size: 24px;
+            cursor: pointer; color: #999;
         }
         #catatanTextarea {
-          flex: 1; padding: 1rem; border: none;
-          resize: none; font-family: 'Inter', sans-serif;
-          font-size: 14px; line-height: 1.5;
+            flex: 1; padding: 1rem; border: none;
+            resize: none; font-family: 'Inter', sans-serif;
+            font-size: 14px; line-height: 1.5;
         }
         #catatanTextarea:focus { outline: none; }
+        
+        /* Sidebar Anggota */
+        #anggotaSidebar {
+            position: fixed; top: 52px; left: -320px;
+            width: 300px; height: calc(100vh - 52px);
+            background-color: #fff; box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: left 0.3s ease-in-out;
+            display: flex; flex-direction: column;
+            z-index: 1000;
+        }
+        #anggotaSidebar.show { left: 0; }
+        #anggotaSidebar .sidebar-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem; border-bottom: 1px solid #eee;
+        }
+        #anggotaSidebar .sidebar-header h3 { margin: 0; color: #00796B; }
+        #anggotaSidebar .sidebar-header .close-btn {
+            background: none; border: none; font-size: 24px;
+            cursor: pointer; color: #999;
+        }
+        #anggotaList {
+            list-style: none; padding: 0; margin: 0;
+            overflow-y: auto; flex: 1;
+        }
+        #anggotaList li {
+            padding: 1rem; border-bottom: 1px solid #eee;
+            display: flex; align-items: center;
+        }
+        #anggotaList li.online::before {
+            content: ''; width: 8px; height: 8px; background: #4CAF50;
+            border-radius: 50%; margin-right: 10px;
+        }
+
+        /* Modal Izin Bicara */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1003;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+            text-align: center;
+            animation: modalOpen 0.3s;
+        }
+        @keyframes modalOpen {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-content h3 {
+            margin-top: 0;
+            color: #00BCD4;
+        }
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-modal:hover,
+        .close-modal:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
     </style>
 </head>
 <body>
@@ -136,9 +212,11 @@
     <h1 id="rapatJudul">Ruang Rapat</h1>
     <button class="menu-button" id="menuBtn"><i class="material-icons">more_vert</i></button>
     <ul class="dropdown-menu" id="dropdownMenu">
-        <li><a href="#" id="menuPemimpin">Pemimpin</a></li>
+        <li><a href="#" id="menuPemimpin">👑 Pemimpin</a></li>
         <li><a href="#" id="mintaIzinBtn">🎙️ Minta Izin Bicara</a></li>
         <li><a href="#" id="bukaCatatanBtn">📝 Catatan</a></li>
+        <li><a href="#" id="bukaAnggotaBtn">👥 Anggota</a></li>
+        <li><a href="#" id="logoutBtn">➡️ Keluar Rapat</a></li>
     </ul>
 </header>
 
@@ -151,18 +229,37 @@
 </div>
 
 <div id="catatanSidebar">
-  <div class="sidebar-header">
-    <h3>Catatan Pribadi</h3>
-    <button id="tutupCatatanBtn" class="close-btn">&times;</button>
-  </div>
-  <textarea id="catatanTextarea" placeholder="Tulis catatan di sini..."></textarea>
+    <div class="sidebar-header">
+        <h3>Catatan Pribadi</h3>
+        <button id="tutupCatatanBtn" class="close-btn">&times;</button>
+    </div>
+    <textarea id="catatanTextarea" placeholder="Tulis catatan di sini..."></textarea>
+</div>
+
+<div id="anggotaSidebar">
+    <div class="sidebar-header">
+        <h3>Anggota Rapat</h3>
+        <button id="tutupAnggotaBtn" class="close-btn">&times;</button>
+    </div>
+    <ul id="anggotaList">
+        </ul>
+</div>
+
+<div id="izinModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h3 id="modalTitle">Minta Izin Bicara</h3>
+        <p id="modalText">Menunggu persetujuan dari pemimpin rapat...</p>
+        <button id="batalIzinBtn" class="option-button" style="background-color: #f44336;">Batalkan</button>
+    </div>
 </div>
 
 <audio id="audio" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, onChildAdded, onValue, set, get, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getDatabase, ref, onChildAdded, onValue, set, get, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    
     const firebaseConfig = {
         apiKey: "AIzaSyDguC7UH1JUzBQu1JZX8qPJGVeb6Pc7t98",
         authDomain: "pustakawan-26664.firebaseapp.com",
@@ -189,23 +286,30 @@
     const menuBtn = document.getElementById('menuBtn');
     const dropdownMenu = document.getElementById('dropdownMenu');
     const menuPemimpin = document.getElementById('menuPemimpin');
-
-    // Elemen baru untuk "Minta Izin Bicara" di dropdown
     const mintaIzinBtn = document.getElementById('mintaIzinBtn');
     const bukaCatatanBtn = document.getElementById('bukaCatatanBtn');
     const catatanSidebar = document.getElementById('catatanSidebar');
     const tutupCatatanBtn = document.getElementById('tutupCatatanBtn');
     const catatanTextarea = document.getElementById('catatanTextarea');
-    
+    const bukaAnggotaBtn = document.getElementById('bukaAnggotaBtn');
+    const anggotaSidebar = document.getElementById('anggotaSidebar');
+    const tutupAnggotaBtn = document.getElementById('tutupAnggotaBtn');
+    const anggotaList = document.getElementById('anggotaList');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const izinModal = document.getElementById('izinModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalText = document.getElementById('modalText');
+    const batalIzinBtn = document.getElementById('batalIzinBtn');
+
     let namaPengguna = id;
     let isSpeaking = false;
     let debounceTimeout;
 
     function debounce(func, delay) {
-      return function(...args) {
-        clearTimeout(debounceTimeout);
-        debounceTimeout = setTimeout(() => func.apply(this, args), delay);
-      };
+        return function(...args) {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => func.apply(this, args), delay);
+        };
     }
 
     async function init() {
@@ -217,11 +321,16 @@
         backBtn.href = `rapat.html?id=${id}`;
 
         const [namaSnap, rapatSnap] = await Promise.all([
-          get(ref(db, `pustakawan/${id}/nama`)),
-          get(ref(db, `rapat/${rapatId}/judul`))
+            get(ref(db, `pustakawan/${id}/nama`)),
+            get(ref(db, `rapat/${rapatId}/judul`))
         ]);
         if (namaSnap.exists()) namaPengguna = namaSnap.val();
         if (rapatSnap.exists()) rapatJudulEl.textContent = rapatSnap.val();
+        
+        // Atur status online pengguna dan bersihkan saat disconnect
+        const userStatusRef = ref(db, `rapat/${rapatId}/anggota/${id}`);
+        set(userStatusRef, { nama: namaPengguna, status: 'nonaktif' });
+        onDisconnect(userStatusRef).remove();
 
         onChildAdded(ref(db, `rapat/${rapatId}/chat`), snap => {
             const { nama, isi } = snap.val();
@@ -245,25 +354,55 @@
                 votingBox.style.display = 'none';
             }
         });
-        
+
         onValue(ref(db, `rapat/${rapatId}/respon/${id}`), snap => {
             const respon = snap.val();
             if (respon) {
+                izinModal.style.display = 'none'; // Sembunyikan modal
                 if (respon === 'izinkan') {
-                    isSpeaking = true;
-                    inputChat.disabled = false;
-                    kirimBtn.disabled = false;
-                    mintaIzinBtn.textContent = '✅ Diizinkan!';
-                    audio.play(); navigator.vibrate?.(300);
-                } else if (respon === 'tolak') {
-                    mintaIzinBtn.textContent = '🎙️ Minta Izin Bicara';
-                    mintaIzinBtn.style.pointerEvents = 'auto';
-                    audio.play(); navigator.vibrate?.(300);
+                    set(ref(db, `rapat/${rapatId}/anggota/${id}/status`), 'aktif');
                 }
-                setTimeout(() => {
-                    remove(ref(db, `rapat/${rapatId}/respon/${id}`));
-                }, 3000);
+                remove(ref(db, `rapat/${rapatId}/respon/${id}`));
             }
+        });
+
+        // 🆕 Perbaikan: Tambahkan listener untuk status bicara individual
+        onValue(ref(db, `rapat/${rapatId}/anggota/${id}/status`), (snap) => {
+            const statusBicara = snap.val();
+            if (statusBicara === 'aktif') {
+                isSpeaking = true;
+                inputChat.disabled = false;
+                kirimBtn.disabled = false;
+                mintaIzinBtn.textContent = '✅ Diizinkan!';
+                mintaIzinBtn.disabled = true; // Nonaktifkan tombol saat sudah diizinkan
+                audio.play(); 
+                navigator.vibrate?.(300);
+            } else {
+                isSpeaking = false;
+                inputChat.disabled = true;
+                kirimBtn.disabled = true;
+                mintaIzinBtn.textContent = '🎙️ Minta Izin Bicara';
+                mintaIzinBtn.disabled = false;
+            }
+        });
+
+        // Perbarui daftar anggota secara real-time
+        onValue(ref(db, `rapat/${rapatId}/anggota`), async (snap) => {
+            anggotaList.innerHTML = '';
+            const anggotaIDs = Object.keys(snap.val() || {});
+            
+            const namaPromises = anggotaIDs.map(idAnggota => 
+                get(ref(db, `pustakawan/${idAnggota}/nama`))
+            );
+            const namaSnaps = await Promise.all(namaPromises);
+
+            namaSnaps.forEach((namaSnap, index) => {
+                const li = document.createElement('li');
+                li.className = 'online';
+                const nama = namaSnap.exists() ? namaSnap.val() : "Nama Tidak Ditemukan";
+                li.textContent = nama;
+                anggotaList.appendChild(li);
+            });
         });
 
         onValue(ref(db, `rapat/${rapatId}/catatan/${id}`), snap => {
@@ -278,10 +417,14 @@
 
         mintaIzinBtn.onclick = (e) => {
             e.preventDefault();
+            if (isSpeaking) return; // Mencegah klik jika sudah diizinkan
             dropdownMenu.classList.remove('show');
             set(ref(db, `rapat/${rapatId}/permintaan/${id}`), { nama: namaPengguna, waktu: Date.now() });
-            mintaIzinBtn.style.pointerEvents = 'none';
-            mintaIzinBtn.textContent = 'Menunggu Izin...';
+            
+            modalTitle.textContent = "Minta Izin Bicara";
+            modalText.textContent = "Menunggu persetujuan dari pemimpin rapat...";
+            batalIzinBtn.style.display = 'block';
+            izinModal.style.display = 'flex';
         };
 
         kirimBtn.onclick = () => {
@@ -294,19 +437,13 @@
             });
             inputChat.value = '';
             inputChat.style.height = '40px';
-
-            isSpeaking = false;
-            inputChat.disabled = true;
-            kirimBtn.disabled = true;
-            mintaIzinBtn.style.pointerEvents = 'auto';
-            mintaIzinBtn.textContent = '🎙️ Minta Izin Bicara';
         };
-        
+
         menuBtn.onclick = (e) => {
             e.stopPropagation();
             dropdownMenu.classList.toggle('show');
         };
-        
+
         bukaCatatanBtn.onclick = () => {
             dropdownMenu.classList.remove('show');
             catatanSidebar.classList.add('show');
@@ -315,11 +452,42 @@
         tutupCatatanBtn.onclick = () => {
             catatanSidebar.classList.remove('show');
         };
-        
-        menuPemimpin.onclick = () => {
-             window.location.href = `pw.html?id=${id}&rapat=${rapatId}`;
+
+        bukaAnggotaBtn.onclick = () => {
+            dropdownMenu.classList.remove('show');
+            anggotaSidebar.classList.add('show');
+        };
+
+        tutupAnggotaBtn.onclick = () => {
+            anggotaSidebar.classList.remove('show');
         };
         
+        logoutBtn.onclick = () => {
+            remove(ref(db, `rapat/${rapatId}/anggota/${id}`));
+            window.location.href = `rapat.html?id=${id}`;
+        };
+        
+        menuPemimpin.onclick = () => {
+            window.location.href = `pw.html?id=${id}&rapat=${rapatId}`;
+        };
+        
+        batalIzinBtn.onclick = () => {
+            izinModal.style.display = 'none';
+            remove(ref(db, `rapat/${rapatId}/permintaan/${id}`));
+        };
+
+        document.querySelector('.close-modal').onclick = () => {
+            izinModal.style.display = 'none';
+            remove(ref(db, `rapat/${rapatId}/permintaan/${id}`));
+        };
+
+        window.onclick = (event) => {
+            if (event.target == izinModal) {
+                izinModal.style.display = 'none';
+                remove(ref(db, `rapat/${rapatId}/permintaan/${id}`));
+            }
+        };
+
         document.addEventListener('click', (event) => {
             if (!menuBtn.contains(event.target) && !dropdownMenu.contains(event.target)) {
                 dropdownMenu.classList.remove('show');
